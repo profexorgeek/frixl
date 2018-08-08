@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Frixl Window</title>
+</head>
+
+<body>
+    <canvas id="frixlCanvas"></canvas>
+    <script src="./dist/frixl.js"></script>
+    <script>
+        window.onload = function () {
+            console.log('Document loaded.');
+            var game = new Frixl.Game(),
+                canvas = document.getElementById('frixlCanvas'),
+                fps = 60;
+
+            game.initialize(canvas, fps, 'black');
+            game.start();
+        }
+    </script>
+</body>
+</html>

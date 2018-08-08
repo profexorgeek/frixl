@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "outFile": "./dist/frixl.js",
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "module": "system",
+        "target": "es5",
+        "alwaysStrict": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
