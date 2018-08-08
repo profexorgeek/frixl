@@ -12,7 +12,7 @@ namespace Frixl.Entity {
             super();
             this._url = url;
             let tb = Frixl.IO.TextureBuffer;
-            let texture = tb.getTexture(this._url);
+            let texture = tb.instance.getTexture(this._url);
 
             if(texture === null) {
                 throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";

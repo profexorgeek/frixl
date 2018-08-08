@@ -261,7 +261,7 @@ var Frixl;
                 var _this = _super.call(this) || this;
                 _this._url = url;
                 var tb = Frixl.IO.TextureBuffer;
-                var texture = tb.getTexture(_this._url);
+                var texture = tb.instance.getTexture(_this._url);
                 if (texture === null) {
                     throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
                 }
