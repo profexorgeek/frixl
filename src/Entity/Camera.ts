@@ -9,7 +9,7 @@ namespace Frixl.Entity {
             super();
             this._size = new Util.Vector(width, height);
             this._position = new Util.Vector();
-            console.log('Frixl camera created at size: ' + this._size);
+            Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + this._size);
         }
     }
 }

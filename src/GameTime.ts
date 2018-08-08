@@ -22,7 +22,7 @@ namespace Frixl {
             this._start = Date.now();
             this._last = this._start;
             this._current = this._start;
-            console.log('New GameTime object created.');
+            Frixl.Game.instance.logger.debug('New GameTime object created.');
         }
 
         update() {

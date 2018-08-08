@@ -1,36 +1,53 @@
 namespace Frixl.IO {
 
     export class TextureBuffer {
-        private static _textures: any = {};
+        private static _instance: TextureBuffer = null;
+        private _textures: any = {};
 
-        public static loadTexture(url: string, callback: Function = null): void {
-
-            try {
-                var img = TextureBuffer.getTexture(url);
+        static get instance(): TextureBuffer {
+            if(this._instance == null) {
+                this._instance = new TextureBuffer();
             }
-            catch (e) {
+            return this._instance;
+        }
+        static set instance(t: TextureBuffer) {
+            this._instance = t;
+        }
+
+        private constructor() {}
+
+        public loadTexture(url: string, callback: Function = null): void {
+
+            if(!(url in this._textures) || this._textures[url] === null)
+            {
+                Frixl.Game.instance.logger.debug('Loading texture: ' + url);
                 let img = new Image();
                 let me = this;
-
-                me._textures[url] = img;
-
                 img.src = url;
                 img.onload = function () {
-                    console.log('Loaded texture: ' + url);
-
+                    Frixl.Game.instance.logger.debug('Texture loaded: ' + url);
+                    me._textures[url] = img;
                     if(callback) {
                         callback();
                     }
                 }
             }
+            else {
+                callback();
+            }
         }
 
-        public static getTexture(url: string) : HTMLImageElement {
-            if(!(url in TextureBuffer._textures)) {
-                throw url + ' was not found in textures. You must load a texture before you can use it.';
+        public getTexture(url: string, callback: Function = null) : HTMLImageElement {
+            let texture = null;
+
+            if((url in this._textures) && this._textures[url] !== null) {
+                texture = this._textures[url];
+            }
+            else {
+                Frixl.Game.instance.logger.warn('Texture ' + url + ' was not found. It should be preloaded.');
             }
 
-            return TextureBuffer._textures[url];
+            return texture;
         }
     }
 }

@@ -16,7 +16,9 @@ var Frixl;
 (function (Frixl) {
     var Game = /** @class */ (function () {
         function Game() {
-            console.log('Frixl engine instance created.');
+            Game.instance = this;
+            this._logger = new Frixl.Util.DefaultLogger();
+            Game.instance.logger.debug('Frixl engine instance created.');
         }
         Object.defineProperty(Game.prototype, "camera", {
             get: function () {
@@ -25,22 +27,45 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Game, "instance", {
+            get: function () {
+                return this._instance;
+            },
+            set: function (game) {
+                this._instance = game;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Game.prototype, "logger", {
+            get: function () {
+                return this._logger;
+            },
+            set: function (logger) {
+                this._logger = logger;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Game.prototype.initialize = function (canvas, fps, background) {
+            this.logger.debug('Initializing game.');
             this._canvas = canvas;
             this._fps = fps;
             this._background = background;
             this._textures = {};
             this._camera = new Frixl.Entity.Camera(this._canvas.width, this._canvas.height);
-            this._renderer = new Frixl.Renderer();
+            this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
         };
         Game.prototype.start = function () {
+            this.logger.debug('Starting game.');
             var g = this;
             this._timer = setInterval(function () {
                 g.update();
             }, (1000 / this._fps));
         };
         Game.prototype.stop = function () {
+            this.logger.debug('Stopping game.');
             clearInterval(this._timer);
         };
         Game.prototype.update = function () {
@@ -64,7 +89,7 @@ var Frixl;
             this._start = Date.now();
             this._last = this._start;
             this._current = this._start;
-            console.log('New GameTime object created.');
+            Frixl.Game.instance.logger.debug('New GameTime object created.');
         }
         Object.defineProperty(GameTime.prototype, "frameSeconds", {
             // TODO: add frame rate averaging features!
@@ -90,55 +115,6 @@ var Frixl;
         return GameTime;
     }());
     Frixl.GameTime = GameTime;
-})(Frixl || (Frixl = {}));
-var Frixl;
-(function (Frixl) {
-    var Util;
-    (function (Util) {
-        var GameUtil = /** @class */ (function () {
-            function GameUtil() {
-            }
-            GameUtil.empty = function (str) {
-                return (!str || /^\s*$/.test(str));
-            };
-            GameUtil.invert = function (num) {
-                return 0 - num;
-            };
-            return GameUtil;
-        }());
-        Util.GameUtil = GameUtil;
-    })(Util = Frixl.Util || (Frixl.Util = {}));
-})(Frixl || (Frixl = {}));
-/// <reference path='./Util/GameUtil.ts' />
-var Frixl;
-/// <reference path='./Util/GameUtil.ts' />
-(function (Frixl) {
-    var Renderer = /** @class */ (function () {
-        function Renderer() {
-        }
-        Renderer.prototype.draw = function (sprites, camera, canvas, background) {
-            var context = canvas.getContext('2d');
-            var camTransX = Frixl.Util.GameUtil.invert(camera.x);
-            var camTransY = camera.y + (context.canvas.height / 2);
-            var fill = Frixl.Util.GameUtil.empty(background) ? 'rgb(0,0,0,0)' : background;
-            context.fillStyle = fill;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            var img = null;
-            var url = 'https://wallpapertag.com/wallpaper/full/d/3/d/267129-large-4k-wallpaper-3840x2160-retina.jpg';
-            try {
-                img = Frixl.IO.TextureBuffer.getTexture(url);
-            }
-            catch (e) {
-                console.log('Texture not found: ' + e.message);
-                Frixl.IO.TextureBuffer.loadTexture(url);
-            }
-            context.save();
-            context.drawImage(img, 0, 0);
-            context.restore();
-        };
-        return Renderer;
-    }());
-    Frixl.Renderer = Renderer;
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
@@ -206,30 +182,12 @@ var Frixl;
                 _this._size = new Frixl.Util.Vector();
                 _this._size = new Frixl.Util.Vector(width, height);
                 _this._position = new Frixl.Util.Vector();
-                console.log('Frixl camera created at size: ' + _this._size);
+                Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
                 return _this;
             }
             return Camera;
         }(Entity.Positionable));
         Entity.Camera = Camera;
-    })(Entity = Frixl.Entity || (Frixl.Entity = {}));
-})(Frixl || (Frixl = {}));
-/// <reference path='./Positionable.ts' />
-var Frixl;
-/// <reference path='./Positionable.ts' />
-(function (Frixl) {
-    var Entity;
-    (function (Entity) {
-        var Sprite = /** @class */ (function (_super) {
-            __extends(Sprite, _super);
-            function Sprite(_url) {
-                var _this = _super.call(this) || this;
-                _this._url = _url;
-                return _this;
-            }
-            return Sprite;
-        }(Entity.Positionable));
-        Entity.Sprite = Sprite;
     })(Entity = Frixl.Entity || (Frixl.Entity = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
@@ -238,36 +196,187 @@ var Frixl;
     (function (IO) {
         var TextureBuffer = /** @class */ (function () {
             function TextureBuffer() {
+                this._textures = {};
             }
-            TextureBuffer.loadTexture = function (url, callback) {
+            Object.defineProperty(TextureBuffer, "instance", {
+                get: function () {
+                    if (this._instance == null) {
+                        this._instance = new TextureBuffer();
+                    }
+                    return this._instance;
+                },
+                set: function (t) {
+                    this._instance = t;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            TextureBuffer.prototype.loadTexture = function (url, callback) {
                 if (callback === void 0) { callback = null; }
-                try {
-                    var img = TextureBuffer.getTexture(url);
-                }
-                catch (e) {
+                if (!(url in this._textures) || this._textures[url] === null) {
+                    Frixl.Game.instance.logger.debug('Loading texture: ' + url);
                     var img_1 = new Image();
-                    var me = this;
-                    me._textures[url] = img_1;
+                    var me_1 = this;
                     img_1.src = url;
                     img_1.onload = function () {
-                        console.log('Loaded texture: ' + url);
+                        Frixl.Game.instance.logger.debug('Texture loaded: ' + url);
+                        me_1._textures[url] = img_1;
                         if (callback) {
                             callback();
                         }
                     };
                 }
-            };
-            TextureBuffer.getTexture = function (url) {
-                if (!(url in TextureBuffer._textures)) {
-                    throw url + ' was not found in textures. You must load a texture before you can use it.';
+                else {
+                    callback();
                 }
-                return TextureBuffer._textures[url];
             };
-            TextureBuffer._textures = {};
+            TextureBuffer.prototype.getTexture = function (url, callback) {
+                if (callback === void 0) { callback = null; }
+                var texture = null;
+                if ((url in this._textures) && this._textures[url] !== null) {
+                    texture = this._textures[url];
+                }
+                else {
+                    Frixl.Game.instance.logger.warn('Texture ' + url + ' was not found. It should be preloaded.');
+                }
+                return texture;
+            };
+            TextureBuffer._instance = null;
             return TextureBuffer;
         }());
         IO.TextureBuffer = TextureBuffer;
     })(IO = Frixl.IO || (Frixl.IO = {}));
+})(Frixl || (Frixl = {}));
+/// <reference path='./Positionable.ts' />
+/// <reference path='../IO/TextureBuffer.ts' />
+var Frixl;
+/// <reference path='./Positionable.ts' />
+/// <reference path='../IO/TextureBuffer.ts' />
+(function (Frixl) {
+    var Entity;
+    (function (Entity) {
+        var Drawable = /** @class */ (function (_super) {
+            __extends(Drawable, _super);
+            function Drawable(url) {
+                var _this = _super.call(this) || this;
+                _this._url = url;
+                var tb = Frixl.IO.TextureBuffer;
+                var texture = tb.getTexture(_this._url);
+                if (texture === null) {
+                    throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
+                }
+                _this._size.x = texture.width;
+                _this._size.y = texture.height;
+                return _this;
+            }
+            return Drawable;
+        }(Entity.Positionable));
+        Entity.Drawable = Drawable;
+    })(Entity = Frixl.Entity || (Frixl.Entity = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var GameUtil = /** @class */ (function () {
+            function GameUtil() {
+            }
+            GameUtil.empty = function (str) {
+                return (!str || /^\s*$/.test(str));
+            };
+            GameUtil.invert = function (num) {
+                return 0 - num;
+            };
+            return GameUtil;
+        }());
+        Util.GameUtil = GameUtil;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+/// <reference path='../Util/GameUtil.ts' />
+var Frixl;
+/// <reference path='../Util/GameUtil.ts' />
+(function (Frixl) {
+    var Rendering;
+    (function (Rendering) {
+        var DefaultRenderer = /** @class */ (function () {
+            function DefaultRenderer() {
+            }
+            DefaultRenderer.prototype.draw = function (drawables, camera, canvas, background) {
+                var context = canvas.getContext('2d');
+                var camTransX = Frixl.Util.GameUtil.invert(camera.x);
+                var camTransY = camera.y + (context.canvas.height / 2);
+                var fill = Frixl.Util.GameUtil.empty(background) ? 'rgb(0,0,0,0)' : background;
+                context.fillStyle = fill;
+                context.fillRect(0, 0, canvas.width, canvas.height);
+            };
+            return DefaultRenderer;
+        }());
+        Rendering.DefaultRenderer = DefaultRenderer;
+    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var DefaultLogger = /** @class */ (function () {
+            function DefaultLogger() {
+                this._level = Util.LogLevel.Debug;
+            }
+            Object.defineProperty(DefaultLogger.prototype, "loglevel", {
+                get: function () {
+                    return this._level;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(DefaultLogger.prototype, "logLevel", {
+                set: function (level) {
+                    this._level = level;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            DefaultLogger.prototype.debug = function (msg) {
+                if (this._level <= Util.LogLevel.Debug) {
+                    this.log('DEBUG: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.info = function (msg) {
+                if (this._level <= Util.LogLevel.Info) {
+                    this.log('INFO: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.warn = function (msg) {
+                if (this._level <= Util.LogLevel.Warn) {
+                    this.log('WARN: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.error = function (msg) {
+                if (this._level <= Util.LogLevel.Error) {
+                    this.log('ERROR: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.log = function (msg) {
+                console.log(msg);
+            };
+            return DefaultLogger;
+        }());
+        Util.DefaultLogger = DefaultLogger;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var LogLevel;
+        (function (LogLevel) {
+            LogLevel[LogLevel["Debug"] = 0] = "Debug";
+            LogLevel[LogLevel["Info"] = 1] = "Info";
+            LogLevel[LogLevel["Warn"] = 2] = "Warn";
+            LogLevel[LogLevel["Error"] = 3] = "Error";
+        })(LogLevel = Util.LogLevel || (Util.LogLevel = {}));
+        ;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
