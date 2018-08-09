@@ -2,8 +2,8 @@ namespace Frixl.Rendering {
 
     export interface IRenderer {
         
-        draw(drawables: Array<Entity.Drawable>, 
-            camera: Entity.Camera, 
+        draw(drawables: Array<Entities.Sprite>, 
+            camera: Camera, 
             canvas: HTMLCanvasElement, 
             background: string): void;
     }

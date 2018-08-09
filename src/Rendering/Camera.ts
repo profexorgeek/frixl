@@ -1,8 +1,8 @@
-/// <reference path='./Positionable.ts' />
+/// <reference path='../Entities/Positionable.ts' />
 
-namespace Frixl.Entity {
+namespace Frixl.Rendering {
 
-    export class Camera extends Positionable {
+    export class Camera extends Entities.Positionable {
         private _size: Util.Vector = new Util.Vector();
 
         constructor(width: number, height: number) {

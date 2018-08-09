@@ -6,7 +6,7 @@ namespace Frixl.Rendering {
 
         constructor() { }
 
-        draw(drawables: Array<Entity.Drawable>, camera: Entity.Camera, canvas: HTMLCanvasElement, background: string): void {
+        draw(drawables: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement, background: string): void {
             let context = canvas.getContext('2d');
             let camTransX = Util.GameUtil.invert(camera.x);
             let camTransY = camera.y + (context.canvas.height / 2);

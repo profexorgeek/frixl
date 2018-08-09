@@ -10,12 +10,12 @@ module Frixl {
         protected _paused: boolean;
         protected _gameTime: GameTime;
         protected _timer: any;
-        protected _camera: Entity.Camera;
+        protected _camera: Rendering.Camera;
         protected _renderer: Rendering.IRenderer;
         protected _textures: any;
         protected _logger: Util.ILogger;
 
-        get camera(): Entity.Camera {
+        get camera(): Rendering.Camera {
             return this._camera;
         }
 
@@ -45,7 +45,7 @@ module Frixl {
             this._fps = fps;
             this._background = background;
             this._textures = {};
-            this._camera = new Entity.Camera(this._canvas.width, this._canvas.height);
+            this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
         }

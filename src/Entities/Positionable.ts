@@ -1,4 +1,4 @@
-namespace Frixl.Entity {
+namespace Frixl.Entities {
 
     export class Positionable {
         protected _position: Util.Vector = new Util.Vector();

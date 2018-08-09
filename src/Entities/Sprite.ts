@@ -1,9 +1,8 @@
-/// <reference path='./Positionable.ts' />
 /// <reference path='../IO/TextureBuffer.ts' />
 
-namespace Frixl.Entity {
+namespace Frixl.Entities {
 
-    export class Drawable extends Positionable {
+    export class Sprite extends Positionable {
         
         private _url: string;
         private _size: Frixl.Util.Vector;
@@ -20,6 +19,10 @@ namespace Frixl.Entity {
 
             this._size.x = texture.width;
             this._size.y = texture.height;
+        }
+
+        update(delta: number): void {
+            
         }
     }
 }

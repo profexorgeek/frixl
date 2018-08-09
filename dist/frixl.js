@@ -53,7 +53,7 @@ var Frixl;
             this._fps = fps;
             this._background = background;
             this._textures = {};
-            this._camera = new Frixl.Entity.Camera(this._canvas.width, this._canvas.height);
+            this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
         };
@@ -118,8 +118,8 @@ var Frixl;
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
-    var Entity;
-    (function (Entity) {
+    var Entities;
+    (function (Entities) {
         var Positionable = /** @class */ (function () {
             function Positionable() {
                 this._position = new Frixl.Util.Vector();
@@ -166,29 +166,8 @@ var Frixl;
             };
             return Positionable;
         }());
-        Entity.Positionable = Positionable;
-    })(Entity = Frixl.Entity || (Frixl.Entity = {}));
-})(Frixl || (Frixl = {}));
-/// <reference path='./Positionable.ts' />
-var Frixl;
-/// <reference path='./Positionable.ts' />
-(function (Frixl) {
-    var Entity;
-    (function (Entity) {
-        var Camera = /** @class */ (function (_super) {
-            __extends(Camera, _super);
-            function Camera(width, height) {
-                var _this = _super.call(this) || this;
-                _this._size = new Frixl.Util.Vector();
-                _this._size = new Frixl.Util.Vector(width, height);
-                _this._position = new Frixl.Util.Vector();
-                Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
-                return _this;
-            }
-            return Camera;
-        }(Entity.Positionable));
-        Entity.Camera = Camera;
-    })(Entity = Frixl.Entity || (Frixl.Entity = {}));
+        Entities.Positionable = Positionable;
+    })(Entities = Frixl.Entities || (Frixl.Entities = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
@@ -247,17 +226,15 @@ var Frixl;
         IO.TextureBuffer = TextureBuffer;
     })(IO = Frixl.IO || (Frixl.IO = {}));
 })(Frixl || (Frixl = {}));
-/// <reference path='./Positionable.ts' />
 /// <reference path='../IO/TextureBuffer.ts' />
 var Frixl;
-/// <reference path='./Positionable.ts' />
 /// <reference path='../IO/TextureBuffer.ts' />
 (function (Frixl) {
-    var Entity;
-    (function (Entity) {
-        var Drawable = /** @class */ (function (_super) {
-            __extends(Drawable, _super);
-            function Drawable(url) {
+    var Entities;
+    (function (Entities) {
+        var Sprite = /** @class */ (function (_super) {
+            __extends(Sprite, _super);
+            function Sprite(url) {
                 var _this = _super.call(this) || this;
                 _this._url = url;
                 var tb = Frixl.IO.TextureBuffer;
@@ -269,10 +246,33 @@ var Frixl;
                 _this._size.y = texture.height;
                 return _this;
             }
-            return Drawable;
-        }(Entity.Positionable));
-        Entity.Drawable = Drawable;
-    })(Entity = Frixl.Entity || (Frixl.Entity = {}));
+            Sprite.prototype.update = function (delta) {
+            };
+            return Sprite;
+        }(Entities.Positionable));
+        Entities.Sprite = Sprite;
+    })(Entities = Frixl.Entities || (Frixl.Entities = {}));
+})(Frixl || (Frixl = {}));
+/// <reference path='../Entities/Positionable.ts' />
+var Frixl;
+/// <reference path='../Entities/Positionable.ts' />
+(function (Frixl) {
+    var Rendering;
+    (function (Rendering) {
+        var Camera = /** @class */ (function (_super) {
+            __extends(Camera, _super);
+            function Camera(width, height) {
+                var _this = _super.call(this) || this;
+                _this._size = new Frixl.Util.Vector();
+                _this._size = new Frixl.Util.Vector(width, height);
+                _this._position = new Frixl.Util.Vector();
+                Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
+                return _this;
+            }
+            return Camera;
+        }(Frixl.Entities.Positionable));
+        Rendering.Camera = Camera;
+    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
@@ -396,5 +396,25 @@ var Frixl;
         }());
         Util.Vector = Vector;
     })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+///<reference path='../Entities/Sprite.ts' />
+var Frixl;
+///<reference path='../Entities/Sprite.ts' />
+(function (Frixl) {
+    var Views;
+    (function (Views) {
+        var View = /** @class */ (function () {
+            function View() {
+                this._drawables = new Array();
+            }
+            View.prototype.update = function (delta) {
+                for (var i = this._drawables.length - 1; i > -1; i -= 1) {
+                    this._drawables[i].update(delta);
+                }
+            };
+            return View;
+        }());
+        Views.View = View;
+    })(Views = Frixl.Views || (Frixl.Views = {}));
 })(Frixl || (Frixl = {}));
 //# sourceMappingURL=frixl.js.map
