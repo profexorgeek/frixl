@@ -9,5 +9,18 @@ namespace Frixl.Util {
         static invert(num: number) : number {
             return 0 - num;
         }
+
+        static clamp(val: number, min: number, max: number): number {
+            let ret = val;
+            if(val > max) {
+                ret = max;
+            }
+
+            if(val < min) {
+                ret = min;
+            }
+
+            return ret;
+        }
     }
 }

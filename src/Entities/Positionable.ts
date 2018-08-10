@@ -22,6 +22,27 @@ namespace Frixl.Entities {
             this._position.y = y;
         }
 
+        get rotation(): number {
+            return this._rotation;
+        }
+        set rotation(rot: number) {
+            this._rotation = rot;
+        }
+
+        get velocity(): Util.Vector {
+            return this._velocity;
+        }
+        set velocity(vel: Util.Vector) {
+            this._velocity = vel;
+        }
+
+        get rotationVelocity(): number {
+            return this._rotationVelocity;
+        }
+        set rotationVelocity(vel: number) {
+            this._rotationVelocity = vel;
+        }
+
         update(delta: number) {
             let deltaSquaredHalved = delta * delta / 2;
             let twoPi = Math.PI / 2;

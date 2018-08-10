@@ -1,4 +1,4 @@
-namespace Frixl.IO {
+namespace Frixl.Rendering {
 
     export class TextureBuffer {
         private static _instance: TextureBuffer = null;
@@ -38,7 +38,7 @@ namespace Frixl.IO {
         }
 
         public getTexture(url: string, callback: Function = null) : HTMLImageElement {
-            let texture = null;
+            let texture: HTMLImageElement = null;
 
             if((url in this._textures) && this._textures[url] !== null) {
                 texture = this._textures[url];

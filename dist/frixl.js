@@ -20,19 +20,19 @@ var Frixl;
             this._logger = new Frixl.Util.DefaultLogger();
             Game.instance.logger.debug('Frixl engine instance created.');
         }
-        Object.defineProperty(Game.prototype, "camera", {
-            get: function () {
-                return this._camera;
-            },
-            enumerable: true,
-            configurable: true
-        });
         Object.defineProperty(Game, "instance", {
             get: function () {
                 return this._instance;
             },
             set: function (game) {
                 this._instance = game;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Game.prototype, "camera", {
+            get: function () {
+                return this._camera;
             },
             enumerable: true,
             configurable: true
@@ -47,6 +47,16 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Game.prototype, "activeView", {
+            get: function () {
+                return this._activeView;
+            },
+            set: function (view) {
+                this._activeView = view;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Game.prototype.initialize = function (canvas, fps, background) {
             this.logger.debug('Initializing game.');
             this._canvas = canvas;
@@ -56,6 +66,7 @@ var Frixl;
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
+            this.activeView = new Frixl.Views.ExampleView();
         };
         Game.prototype.start = function () {
             this.logger.debug('Starting game.');
@@ -70,10 +81,15 @@ var Frixl;
         };
         Game.prototype.update = function () {
             this._gameTime.update();
+            if (this._activeView) {
+                this._activeView.update(this._gameTime.frameSeconds);
+            }
             this.draw();
         };
         Game.prototype.draw = function () {
-            this._renderer.draw(null, this._camera, this._canvas, this._background);
+            if (this._activeView != null) {
+                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas, this._background);
+            }
         };
         Game.prototype.toString = function () {
             return 'Instance of the Frixl game engine.';
@@ -149,6 +165,36 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Positionable.prototype, "rotation", {
+                get: function () {
+                    return this._rotation;
+                },
+                set: function (rot) {
+                    this._rotation = rot;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "velocity", {
+                get: function () {
+                    return this._velocity;
+                },
+                set: function (vel) {
+                    this._velocity = vel;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "rotationVelocity", {
+                get: function () {
+                    return this._rotationVelocity;
+                },
+                set: function (vel) {
+                    this._rotationVelocity = vel;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Positionable.prototype.update = function (delta) {
                 var deltaSquaredHalved = delta * delta / 2;
                 var twoPi = Math.PI / 2;
@@ -171,8 +217,8 @@ var Frixl;
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
-    var IO;
-    (function (IO) {
+    var Rendering;
+    (function (Rendering) {
         var TextureBuffer = /** @class */ (function () {
             function TextureBuffer() {
                 this._textures = {};
@@ -223,30 +269,64 @@ var Frixl;
             TextureBuffer._instance = null;
             return TextureBuffer;
         }());
-        IO.TextureBuffer = TextureBuffer;
-    })(IO = Frixl.IO || (Frixl.IO = {}));
+        Rendering.TextureBuffer = TextureBuffer;
+    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
 })(Frixl || (Frixl = {}));
-/// <reference path='../IO/TextureBuffer.ts' />
+/// <reference path='../Rendering/TextureBuffer.ts' />
 var Frixl;
-/// <reference path='../IO/TextureBuffer.ts' />
+/// <reference path='../Rendering/TextureBuffer.ts' />
 (function (Frixl) {
     var Entities;
     (function (Entities) {
         var Sprite = /** @class */ (function (_super) {
             __extends(Sprite, _super);
-            function Sprite(url) {
+            function Sprite(textureName) {
                 var _this = _super.call(this) || this;
-                _this._url = url;
-                var tb = Frixl.IO.TextureBuffer;
-                var texture = tb.instance.getTexture(_this._url);
-                if (texture === null) {
-                    throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
-                }
-                _this._size.x = texture.width;
-                _this._size.y = texture.height;
+                _this._size = new Frixl.Util.Vector();
+                _this._layer = 0;
+                _this._alpha = 1;
+                _this.textureName = textureName;
                 return _this;
             }
+            Object.defineProperty(Sprite.prototype, "layer", {
+                get: function () {
+                    return this._layer;
+                },
+                set: function (l) {
+                    this._layer = l;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "alpha", {
+                get: function () {
+                    return this._alpha;
+                },
+                set: function (a) {
+                    this._alpha = Frixl.Util.GameUtil.clamp(a, 0, 1);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "textureName", {
+                get: function () {
+                    return this._textureName;
+                },
+                set: function (name) {
+                    this._textureName = name;
+                    var tb = Frixl.Rendering.TextureBuffer;
+                    var tex = tb.instance.getTexture(this._textureName);
+                    if (tex === null) {
+                        throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
+                    }
+                    this._size.x = tex.width;
+                    this._size.y = tex.height;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Sprite.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
             };
             return Sprite;
         }(Entities.Positionable));
@@ -287,6 +367,16 @@ var Frixl;
             GameUtil.invert = function (num) {
                 return 0 - num;
             };
+            GameUtil.clamp = function (val, min, max) {
+                var ret = val;
+                if (val > max) {
+                    ret = max;
+                }
+                if (val < min) {
+                    ret = min;
+                }
+                return ret;
+            };
             return GameUtil;
         }());
         Util.GameUtil = GameUtil;
@@ -301,13 +391,44 @@ var Frixl;
         var DefaultRenderer = /** @class */ (function () {
             function DefaultRenderer() {
             }
-            DefaultRenderer.prototype.draw = function (drawables, camera, canvas, background) {
+            DefaultRenderer.prototype.draw = function (sprites, camera, canvas, background) {
                 var context = canvas.getContext('2d');
-                var camTransX = Frixl.Util.GameUtil.invert(camera.x);
+                var camTransX = Frixl.Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
                 var camTransY = camera.y + (context.canvas.height / 2);
                 var fill = Frixl.Util.GameUtil.empty(background) ? 'rgb(0,0,0,0)' : background;
                 context.fillStyle = fill;
                 context.fillRect(0, 0, canvas.width, canvas.height);
+                context.save();
+                context.translate(camTransX, camTransY);
+                for (var i = 0; i < sprites.length; i++) {
+                    this.drawSprite(sprites[i], context);
+                }
+                context.restore();
+            };
+            DefaultRenderer.prototype.drawSprite = function (sprite, context) {
+                var texture = null;
+                if (!Frixl.Util.GameUtil.empty(sprite.textureName)) {
+                    texture = Rendering.TextureBuffer.instance.getTexture(sprite.textureName);
+                }
+                var transX = sprite.x;
+                var transY = Frixl.Util.GameUtil.invert(sprite.y);
+                var rotation = -sprite.rotation;
+                var alpha = sprite.alpha;
+                context.save();
+                context.translate(transX, transY);
+                context.rotate(rotation);
+                context.globalAlpha = alpha;
+                if (texture) {
+                    context.drawImage(texture, 0, // TODO: replace with left texture coord
+                    0, // TODO: replace with top texture coord
+                    texture.width, // TODO: replace with calculated width from texture coords
+                    texture.height, // TODO: replace with calculated height from texture coords
+                    texture.width / -2, texture.height / -2, texture.width, texture.height);
+                }
+                // reset alpha before drawing children
+                context.globalAlpha = 1;
+                // TODO: recurse through sprite children
+                context.restore();
             };
             return DefaultRenderer;
         }());
@@ -405,16 +526,83 @@ var Frixl;
     (function (Views) {
         var View = /** @class */ (function () {
             function View() {
-                this._drawables = new Array();
+                this._sprites = new Array();
             }
+            Object.defineProperty(View.prototype, "sprites", {
+                get: function () {
+                    return this._sprites;
+                },
+                enumerable: true,
+                configurable: true
+            });
             View.prototype.update = function (delta) {
-                for (var i = this._drawables.length - 1; i > -1; i -= 1) {
-                    this._drawables[i].update(delta);
+                for (var i = this._sprites.length - 1; i > -1; i -= 1) {
+                    this._sprites[i].update(delta);
                 }
+            };
+            View.prototype.addSprite = function (sprite) {
+                var drawLayer = this._sprites.length - 1;
+                for (var i = 0; i < this._sprites.length; i += 1) {
+                    if (sprite.layer < this._sprites[i].layer) {
+                        drawLayer = i;
+                        break;
+                    }
+                }
+                this._sprites.splice(drawLayer, 0, sprite);
+            };
+            View.prototype.addSprites = function (sprites) {
+                for (var i = 0; i < sprites.length; i += 1) {
+                    this.addSprite(sprites[i]);
+                }
+            };
+            View.prototype.removeSprite = function (sprite) {
+                var index = this._sprites.indexOf(sprite);
+                if (index >= 0) {
+                    this._sprites.splice(index, 1);
+                }
+            };
+            View.prototype.removeSprites = function (sprites) {
+                for (var i = 0; i < sprites.length; i++) {
+                    this.removeSprite(sprites[i]);
+                }
+            };
+            View.prototype.clearSprites = function () {
+                this._sprites = new Array();
             };
             return View;
         }());
         Views.View = View;
+    })(Views = Frixl.Views || (Frixl.Views = {}));
+})(Frixl || (Frixl = {}));
+/// <reference path='./View.ts' />
+var Frixl;
+/// <reference path='./View.ts' />
+(function (Frixl) {
+    var Views;
+    (function (Views) {
+        var ExampleView = /** @class */ (function (_super) {
+            __extends(ExampleView, _super);
+            function ExampleView() {
+                var _this = _super.call(this) || this;
+                _this._textureUrl = './content/frostFlake.png';
+                _this.spriteLoaded = function () {
+                    Frixl.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
+                    var sprite = new Frixl.Entities.Sprite(_this._textureUrl);
+                    sprite.rotation = 0.15;
+                    sprite.x = 50;
+                    sprite.y = -50;
+                    sprite.velocity = new Frixl.Util.Vector(-5, 0);
+                    sprite.rotationVelocity = 1;
+                    _this.addSprite(sprite);
+                };
+                Frixl.Game.instance.logger.debug('ExampleView instantiated.');
+                // preload a texture
+                Frixl.Rendering.TextureBuffer.instance.loadTexture(_this._textureUrl, _this.spriteLoaded);
+                return _this;
+            }
+            return ExampleView;
+        }(Views.View));
+        Views.ExampleView = ExampleView;
     })(Views = Frixl.Views || (Frixl.Views = {}));
 })(Frixl || (Frixl = {}));
 //# sourceMappingURL=frixl.js.map

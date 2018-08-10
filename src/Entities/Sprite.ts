@@ -1,12 +1,13 @@
-/// <reference path='../IO/TextureBuffer.ts' />
+/// <reference path='../Rendering/TextureBuffer.ts' />
 
 namespace Frixl.Entities {
 
     export class Sprite extends Positionable {
         
-        private _url: string;
-        private _size: Frixl.Util.Vector;
-        private _layer: number;
+        private _textureName: string;
+        private _size: Util.Vector = new Util.Vector();
+        private _layer: number = 0;
+        private _alpha: number = 1;
 
         get layer(): number {
             return this._layer;
@@ -15,23 +16,38 @@ namespace Frixl.Entities {
             this._layer = l;
         }
 
-        constructor(url: string) {
-            super();
-            this._url = url;
-            this._layer = 0;
-            let tb = Frixl.IO.TextureBuffer;
-            let texture = tb.instance.getTexture(this._url);
+        get alpha(): number {
+            return this._alpha;
+        }
+        set alpha(a: number) {
+            this._alpha = Util.GameUtil.clamp(a, 0, 1);
+        }
 
-            if(texture === null) {
+        get textureName(): string {
+            return this._textureName;
+        }
+        set textureName(name: string) {
+            this._textureName = name;
+
+            let tb = Rendering.TextureBuffer;
+            let tex = tb.instance.getTexture(this._textureName);
+
+            if(tex === null) {
                 throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
             }
 
-            this._size.x = texture.width;
-            this._size.y = texture.height;
+            this._size.x = tex.width;
+            this._size.y = tex.height;
+        }
+
+
+        constructor(textureName: string) {
+            super();
+            this.textureName = textureName;
         }
 
         update(delta: number): void {
-            
+            super.update(delta);
         }
     }
 }

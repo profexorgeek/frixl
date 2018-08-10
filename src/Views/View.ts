@@ -23,6 +23,7 @@ namespace Frixl.Views {
                     break;
                 }
             }
+            this._sprites.splice(drawLayer, 0, sprite);
         }
 
         addSprites(sprites: Array<Entities.Sprite>): void {

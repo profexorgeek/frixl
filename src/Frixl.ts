@@ -14,7 +14,7 @@ module Frixl {
         protected _renderer: Rendering.IRenderer;
         protected _textures: any;
         protected _logger: Util.ILogger;
-        protected _activeView: Views.View = new Views.View();
+        protected _activeView: Views.View;
 
         static get instance(): Game {
             return this._instance;
@@ -56,6 +56,8 @@ module Frixl {
             this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
+
+            this.activeView = new Views.ExampleView();
         }
 
         start(): void {
@@ -73,6 +75,11 @@ module Frixl {
     
         update(): void {
             this._gameTime.update();
+            
+            if(this._activeView) {
+                this._activeView.update(this._gameTime.frameSeconds);
+            }
+
             this.draw();
         }
     
