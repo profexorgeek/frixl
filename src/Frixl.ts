@@ -14,10 +14,7 @@ module Frixl {
         protected _renderer: Rendering.IRenderer;
         protected _textures: any;
         protected _logger: Util.ILogger;
-
-        get camera(): Rendering.Camera {
-            return this._camera;
-        }
+        protected _activeView: Views.View = new Views.View();
 
         static get instance(): Game {
             return this._instance;
@@ -26,11 +23,22 @@ module Frixl {
             this._instance = game;
         }
 
+        get camera(): Rendering.Camera {
+            return this._camera;
+        }
+
         get logger(): Util.ILogger {
             return this._logger;
         }
         set logger(logger: Util.ILogger) {
             this._logger = logger;
+        }
+
+        get activeView(): Views.View {
+            return this._activeView;
+        }
+        set activeView(view: Views.View) {
+            this._activeView = view;
         }
     
         constructor() {
@@ -69,7 +77,9 @@ module Frixl {
         }
     
         draw(): void {
-            this._renderer.draw(null, this._camera, this._canvas, this._background);    
+            if(this._activeView != null) {
+                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas, this._background);    
+            }
         }
 
         toString(): string {
