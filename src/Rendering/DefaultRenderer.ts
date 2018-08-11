@@ -56,7 +56,12 @@ namespace Frixl.Rendering {
             // reset alpha before drawing children
             context.globalAlpha = 1;
 
-            // TODO: recurse through sprite children
+            // draw children
+            for(let i = 0; i < sprite.children.length; i += 1) {
+                if(sprite.children[i] instanceof Entities.Sprite) {
+                    this.drawSprite(sprite.children[i] as Entities.Sprite, context);
+                }
+            }
 
             context.restore();
         }

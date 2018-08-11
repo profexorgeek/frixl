@@ -144,28 +144,11 @@ var Frixl;
                 this._rotation = 0;
                 this._rotationVelocity = 0;
                 this._drag = 0;
+                this._children = new Array();
+                this._parent = null;
             }
-            Object.defineProperty(Positionable.prototype, "x", {
-                get: function () {
-                    return this._position.x;
-                },
-                set: function (x) {
-                    this._position.x = x;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(Positionable.prototype, "y", {
-                get: function () {
-                    return this._position.y;
-                },
-                set: function (y) {
-                    this._position.y = y;
-                },
-                enumerable: true,
-                configurable: true
-            });
             Object.defineProperty(Positionable.prototype, "rotation", {
+                // #region Properties
                 get: function () {
                     return this._rotation;
                 },
@@ -195,9 +178,93 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Positionable.prototype, "children", {
+                get: function () {
+                    return this._children;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "parent", {
+                get: function () {
+                    return this._parent;
+                },
+                set: function (p) {
+                    this._parent = p;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "x", {
+                get: function () {
+                    return this._position.x;
+                },
+                set: function (x) {
+                    this._position.x = x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "y", {
+                get: function () {
+                    return this._position.y;
+                },
+                set: function (y) {
+                    this._position.y = y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "absolutePosition", {
+                get: function () {
+                    var abs = new Frixl.Util.Vector();
+                    if (this._parent != null) {
+                        abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x;
+                        abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y;
+                    }
+                    else {
+                        abs.x = this._position.x;
+                        abs.y = this._position.y;
+                    }
+                    return abs;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "absoluteRotation", {
+                get: function () {
+                    var rot = this._rotation;
+                    if (this._parent != null) {
+                        rot += this._parent.absoluteRotation;
+                    }
+                    return rot;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            // #endregion
+            Positionable.prototype.addChild = function (c) {
+                c.parent = this;
+                this._children.push(c);
+            };
+            Positionable.prototype.removeChild = function (c) {
+                var i = this._children.indexOf(c);
+                if (i > 0) {
+                    this._children.splice(i, 1);
+                }
+                c.parent = null;
+            };
+            Positionable.prototype.attachTo = function (p) {
+                p.addChild(this);
+            };
+            Positionable.prototype.detach = function () {
+                if (this._parent != null) {
+                    this._parent.removeChild(this);
+                }
+            };
             Positionable.prototype.update = function (delta) {
                 var deltaSquaredHalved = delta * delta / 2;
-                var twoPi = Math.PI / 2;
+                var twoPi = Math.PI * 2;
                 this._position.x += (this._velocity.x * delta) + (this._acceleration.x * deltaSquaredHalved);
                 this._position.y += (this._velocity.y * delta) + (this._acceleration.y * deltaSquaredHalved);
                 this._velocity.x += (this._acceleration.x * delta) - (this._drag * this._velocity.x * delta);
@@ -208,6 +275,9 @@ var Frixl;
                 }
                 while (this._rotation < 0) {
                     this._rotation += twoPi;
+                }
+                for (var i = 0; i < this._children.length; i += 1) {
+                    this._children[i].update(delta);
                 }
             };
             return Positionable;
@@ -427,7 +497,12 @@ var Frixl;
                 }
                 // reset alpha before drawing children
                 context.globalAlpha = 1;
-                // TODO: recurse through sprite children
+                // draw children
+                for (var i = 0; i < sprite.children.length; i += 1) {
+                    if (sprite.children[i] instanceof Frixl.Entities.Sprite) {
+                        this.drawSprite(sprite.children[i], context);
+                    }
+                }
                 context.restore();
             };
             return DefaultRenderer;
@@ -589,10 +664,14 @@ var Frixl;
                     Frixl.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
                     var sprite = new Frixl.Entities.Sprite(_this._textureUrl);
                     sprite.rotation = 0.15;
-                    sprite.x = 50;
-                    sprite.y = -50;
-                    sprite.velocity = new Frixl.Util.Vector(-5, 0);
+                    sprite.x = 0;
+                    sprite.y = 0;
                     sprite.rotationVelocity = 1;
+                    var childSprite = new Frixl.Entities.Sprite(_this._textureUrl);
+                    childSprite.attachTo(sprite);
+                    childSprite.x = 50;
+                    childSprite.y = 50;
+                    childSprite.rotationVelocity = -5;
                     _this.addSprite(sprite);
                 };
                 Frixl.Game.instance.logger.debug('ExampleView instantiated.');

@@ -17,12 +17,18 @@ namespace Frixl.Views {
 
         spriteLoaded = () => {
             Game.instance.logger.debug('Sprite texture loaded, adding to view.');
+
             let sprite = new Entities.Sprite(this._textureUrl);
             sprite.rotation = 0.15;
-            sprite.x = 50;
-            sprite.y = -50;
-            sprite.velocity = new Util.Vector(-5, 0);
+            sprite.x = 0;
+            sprite.y = 0;
             sprite.rotationVelocity = 1;
+
+            let childSprite = new Entities.Sprite(this._textureUrl);
+            childSprite.attachTo(sprite);
+            childSprite.x = 50;
+            childSprite.y = 50;
+            childSprite.rotationVelocity = -5;
 
             this.addSprite(sprite);
         }
