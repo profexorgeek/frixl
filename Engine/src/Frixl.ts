@@ -1,4 +1,4 @@
-module Frixl {
+namespace Frixl {
 
     export class Game {
 
@@ -53,7 +53,7 @@ module Frixl {
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
 
-            this.activeView = new Views.ExampleView();
+            this.activeView = new Views.View();
         }
 
         start(): void {

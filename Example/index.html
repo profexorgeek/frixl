@@ -7,15 +7,11 @@
 
 <body>
     <canvas id="frixlCanvas" width="800px" height="600px"></canvas>
-    <script src="./dist/frixl.js"></script>
+    <script src="../Engine/dist/frixl.js"></script>
+    <script src="./game.js"></script>
     <script>
         window.onload = function () {
-            var game = new Frixl.Game(),
-                canvas = document.getElementById('frixlCanvas'),
-                fps = 60;
-
-            game.initialize(canvas, fps);
-            game.start();
+            var game = new Example.Game();
         }
     </script>
 </body>

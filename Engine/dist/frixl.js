@@ -64,7 +64,7 @@ var Frixl;
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
-            this.activeView = new Frixl.Views.ExampleView();
+            this.activeView = new Frixl.Views.View();
         };
         Game.prototype.start = function () {
             this.logger.debug('Starting game.');
@@ -831,45 +831,6 @@ var Frixl;
             return View;
         }());
         Views.View = View;
-    })(Views = Frixl.Views || (Frixl.Views = {}));
-})(Frixl || (Frixl = {}));
-/// <reference path='./View.ts' />
-var Frixl;
-/// <reference path='./View.ts' />
-(function (Frixl) {
-    var Views;
-    (function (Views) {
-        var ExampleView = /** @class */ (function (_super) {
-            __extends(ExampleView, _super);
-            function ExampleView() {
-                var _this = _super.call(this) || this;
-                _this._textureUrl = './content/frostFlake.png';
-                _this.spriteLoaded = function () {
-                    Frixl.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
-                    var sprite = new Frixl.Entities.Sprite(_this._textureUrl);
-                    sprite.rotation = 0.15;
-                    sprite.x = 0;
-                    sprite.y = 0;
-                    sprite.rotationVelocity = 0.125;
-                    for (var i = 0; i < 1000; i += 1) {
-                        var s = new Frixl.Entities.Sprite(_this._textureUrl);
-                        var pos = Frixl.Game.instance.camera.randomVectorInView;
-                        s.x = pos.x;
-                        s.y = pos.y;
-                        s.alpha = Frixl.Util.GameUtil.randomInRange(0.25, 1);
-                        s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
-                        s.attachTo(sprite);
-                    }
-                    _this.addSprite(sprite);
-                };
-                Frixl.Game.instance.logger.debug('ExampleView instantiated.');
-                // preload a texture
-                Frixl.Rendering.TextureBuffer.instance.loadTexture(_this._textureUrl, _this.spriteLoaded);
-                return _this;
-            }
-            return ExampleView;
-        }(Views.View));
-        Views.ExampleView = ExampleView;
     })(Views = Frixl.Views || (Frixl.Views = {}));
 })(Frixl || (Frixl = {}));
 //# sourceMappingURL=frixl.js.map
