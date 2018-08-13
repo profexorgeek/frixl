@@ -22,13 +22,17 @@ namespace Frixl.Views {
             sprite.rotation = 0.15;
             sprite.x = 0;
             sprite.y = 0;
-            sprite.rotationVelocity = 1;
+            sprite.rotationVelocity = 0.125;
 
-            let childSprite = new Entities.Sprite(this._textureUrl);
-            childSprite.attachTo(sprite);
-            childSprite.x = 50;
-            childSprite.y = 50;
-            childSprite.rotationVelocity = -5;
+            for(let i = 0; i < 1000; i += 1) {
+                let s = new Entities.Sprite(this._textureUrl);
+                let pos = Game.instance.camera.randomVectorInView;
+                s.x = pos.x;
+                s.y = pos.y;
+                s.alpha = Util.GameUtil.randomInRange(0.25, 1);
+                s.rotationVelocity = Util.GameUtil.randomInRange(-Math.PI, Math.PI);
+                s.attachTo(sprite);
+            }
 
             this.addSprite(sprite);
         }

@@ -57,11 +57,10 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
-        Game.prototype.initialize = function (canvas, fps, background) {
+        Game.prototype.initialize = function (canvas, fps) {
             this.logger.debug('Initializing game.');
             this._canvas = canvas;
             this._fps = fps;
-            this._background = background;
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
@@ -90,7 +89,7 @@ var Frixl;
         };
         Game.prototype.draw = function () {
             if (this._activeView != null) {
-                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas, this._background);
+                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas);
             }
         };
         Game.prototype.toString = function () {
@@ -416,11 +415,57 @@ var Frixl;
             function Camera(width, height) {
                 var _this = _super.call(this) || this;
                 _this._size = new Frixl.Util.Vector();
+                _this._background = 'CornflowerBlue';
                 _this._size = new Frixl.Util.Vector(width, height);
                 _this._position = new Frixl.Util.Vector();
                 Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
                 return _this;
             }
+            Object.defineProperty(Camera.prototype, "background", {
+                get: function () {
+                    return this._background;
+                },
+                set: function (color) {
+                    this._background = color;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "left", {
+                get: function () {
+                    return this._position.x - (this._size.x / 2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "right", {
+                get: function () {
+                    return this._position.x + (this._size.x / 2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "top", {
+                get: function () {
+                    return this._position.y + (this._size.y / 2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "bottom", {
+                get: function () {
+                    return this._position.y - (this._size.y / 2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "randomVectorInView", {
+                get: function () {
+                    return new Frixl.Util.Vector(Frixl.Util.GameUtil.randomInRange(this.left, this.right), Frixl.Util.GameUtil.randomInRange(this.bottom, this.top));
+                },
+                enumerable: true,
+                configurable: true
+            });
             return Camera;
         }(Frixl.Entities.Positionable));
         Rendering.Camera = Camera;
@@ -449,6 +494,11 @@ var Frixl;
                 }
                 return ret;
             };
+            GameUtil.randomInRange = function (min, max) {
+                var range = max - min;
+                var val = Math.random() * range;
+                return val + min;
+            };
             return GameUtil;
         }());
         Util.GameUtil = GameUtil;
@@ -463,12 +513,11 @@ var Frixl;
         var DefaultRenderer = /** @class */ (function () {
             function DefaultRenderer() {
             }
-            DefaultRenderer.prototype.draw = function (sprites, camera, canvas, background) {
+            DefaultRenderer.prototype.draw = function (sprites, camera, canvas) {
                 var context = canvas.getContext('2d');
                 var camTransX = Frixl.Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
                 var camTransY = camera.y + (context.canvas.height / 2);
-                var fill = Frixl.Util.GameUtil.empty(background) ? 'rgb(0,0,0,0)' : background;
-                context.fillStyle = fill;
+                context.fillStyle = camera.background;
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.save();
                 context.translate(camTransX, camTransY);
@@ -668,12 +717,16 @@ var Frixl;
                     sprite.rotation = 0.15;
                     sprite.x = 0;
                     sprite.y = 0;
-                    sprite.rotationVelocity = 1;
-                    var childSprite = new Frixl.Entities.Sprite(_this._textureUrl);
-                    childSprite.attachTo(sprite);
-                    childSprite.x = 50;
-                    childSprite.y = 50;
-                    childSprite.rotationVelocity = -5;
+                    sprite.rotationVelocity = 0.125;
+                    for (var i = 0; i < 1000; i += 1) {
+                        var s = new Frixl.Entities.Sprite(_this._textureUrl);
+                        var pos = Frixl.Game.instance.camera.randomVectorInView;
+                        s.x = pos.x;
+                        s.y = pos.y;
+                        s.alpha = Frixl.Util.GameUtil.randomInRange(0.25, 1);
+                        s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
+                        s.attachTo(sprite);
+                    }
                     _this.addSprite(sprite);
                 };
                 Frixl.Game.instance.logger.debug('ExampleView instantiated.');

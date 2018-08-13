@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <canvas id="frixlCanvas"></canvas>
+    <canvas id="frixlCanvas" width="800px" height="600px"></canvas>
     <script src="./dist/frixl.js"></script>
     <script>
         window.onload = function () {
@@ -14,7 +14,7 @@
                 canvas = document.getElementById('frixlCanvas'),
                 fps = 60;
 
-            game.initialize(canvas, fps, 'black');
+            game.initialize(canvas, fps);
             game.start();
         }
     </script>
