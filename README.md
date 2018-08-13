@@ -20,6 +20,9 @@ compile scripts.
 - Build once: `tsc`
 - To watch and build: `tsc -w`
 
+## Run
+Open index.html in your favorite browser!
+
 ## Current Features
 - Views: containers to organize a level, menu or similar concept into self-contained components
 - Positionable: base game entity that can be positioned, rotated and has properties like velocity and acceleration that automatically update the position. Supports attachment to a parent and infinitely nestable children.
