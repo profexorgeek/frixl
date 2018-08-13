@@ -353,9 +353,9 @@ var Frixl;
             __extends(Sprite, _super);
             function Sprite(textureName) {
                 var _this = _super.call(this) || this;
-                _this._size = new Frixl.Util.Vector();
                 _this._layer = 0;
                 _this._alpha = 1;
+                _this._textureCoords = new Frixl.Util.Rectangle();
                 _this.textureName = textureName;
                 return _this;
             }
@@ -379,6 +379,16 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Sprite.prototype, "textureCoords", {
+                get: function () {
+                    return this._textureCoords;
+                },
+                set: function (rect) {
+                    this._textureCoords = rect;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Object.defineProperty(Sprite.prototype, "textureName", {
                 get: function () {
                     return this._textureName;
@@ -390,8 +400,7 @@ var Frixl;
                     if (tex === null) {
                         throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
                     }
-                    this._size.x = tex.width;
-                    this._size.y = tex.height;
+                    this._textureCoords.setFromTextureCoords(0, 0, tex.width, tex.height);
                 },
                 enumerable: true,
                 configurable: true
@@ -540,11 +549,8 @@ var Frixl;
                 context.rotate(rotation);
                 context.globalAlpha = alpha;
                 if (texture) {
-                    context.drawImage(texture, 0, // TODO: replace with left texture coord
-                    0, // TODO: replace with top texture coord
-                    texture.width, // TODO: replace with calculated width from texture coords
-                    texture.height, // TODO: replace with calculated height from texture coords
-                    texture.width / -2, texture.height / -2, texture.width, texture.height);
+                    var coords = sprite.textureCoords;
+                    context.drawImage(texture, coords.left, coords.top, coords.width, coords.height, coords.width / -2, coords.height / -2, coords.width, coords.height);
                 }
                 // reset alpha before drawing children
                 context.globalAlpha = 1;
@@ -623,6 +629,133 @@ var Frixl;
             LogLevel[LogLevel["Error"] = 3] = "Error";
         })(LogLevel = Util.LogLevel || (Util.LogLevel = {}));
         ;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var Rectangle = /** @class */ (function () {
+            function Rectangle(x, y, width, height) {
+                if (x === void 0) { x = 0; }
+                if (y === void 0) { y = 0; }
+                if (width === void 0) { width = 0; }
+                if (height === void 0) { height = 0; }
+                this._left = 0;
+                this._top = 0;
+                this._right = 0;
+                this._bottom = 0;
+                this._position = new Util.Vector();
+                this._size = new Util.Vector();
+                this._position = new Util.Vector(x, y);
+                this._size = new Util.Vector(width, height);
+            }
+            Object.defineProperty(Rectangle.prototype, "position", {
+                get: function () {
+                    return this._position;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "size", {
+                get: function () {
+                    return this._size;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "x", {
+                get: function () {
+                    return this._position.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "y", {
+                get: function () {
+                    return this._position.y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "width", {
+                get: function () {
+                    return this._size.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "height", {
+                get: function () {
+                    return this._size.y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "left", {
+                get: function () {
+                    return this._left;
+                },
+                set: function (left) {
+                    this._left = left;
+                    this.updateSizeAndPosition();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "top", {
+                get: function () {
+                    return this._top;
+                },
+                set: function (top) {
+                    this._top = top;
+                    this.updateSizeAndPosition();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "right", {
+                get: function () {
+                    return this._right;
+                },
+                set: function (right) {
+                    this._right = right;
+                    this.updateSizeAndPosition();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Rectangle.prototype, "bottom", {
+                get: function () {
+                    return this._bottom;
+                },
+                set: function (bottom) {
+                    this._bottom = bottom;
+                    this.updateSizeAndPosition();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Rectangle.prototype.updateSizeAndPosition = function () {
+                this._size.x = Math.abs(this.right - this.left);
+                this._size.y = Math.abs(this.top - this.bottom);
+                this._position.x = this.left + this.size.x / 2;
+                this._position.y = this.bottom + this.size.y / 2;
+            };
+            Rectangle.prototype.setEdges = function (left, top, right, bottom) {
+                this._left = left;
+                this._top = top;
+                this._right = right;
+                this._bottom = bottom;
+                this.updateSizeAndPosition();
+            };
+            Rectangle.prototype.setFromTextureCoords = function (left, top, width, height) {
+                // texture coords count from the top so we invert them for the renderer
+                this.setEdges(left, top, left + width, top - height);
+            };
+            return Rectangle;
+        }());
+        Util.Rectangle = Rectangle;
     })(Util = Frixl.Util || (Frixl.Util = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;

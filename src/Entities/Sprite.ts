@@ -5,9 +5,9 @@ namespace Frixl.Entities {
     export class Sprite extends Positionable {
         
         private _textureName: string;
-        private _size: Util.Vector = new Util.Vector();
         private _layer: number = 0;
         private _alpha: number = 1;
+        private _textureCoords: Util.Rectangle = new Util.Rectangle();
 
         get layer(): number {
             return this._layer;
@@ -23,6 +23,13 @@ namespace Frixl.Entities {
             this._alpha = Util.GameUtil.clamp(a, 0, 1);
         }
 
+        get textureCoords(): Util.Rectangle {
+            return this._textureCoords;
+        }
+        set textureCoords(rect: Util.Rectangle) {
+            this._textureCoords = rect;
+        }
+
         get textureName(): string {
             return this._textureName;
         }
@@ -36,8 +43,7 @@ namespace Frixl.Entities {
                 throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
             }
 
-            this._size.x = tex.width;
-            this._size.y = tex.height;
+            this._textureCoords.setFromTextureCoords(0, 0, tex.width, tex.height);
         }
 
 

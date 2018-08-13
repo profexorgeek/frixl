@@ -39,16 +39,17 @@ namespace Frixl.Rendering {
             context.globalAlpha = alpha;
 
             if(texture) {
+                let coords = sprite.textureCoords;
                 context.drawImage(
                     texture,
-                    0, // TODO: replace with left texture coord
-                    0, // TODO: replace with top texture coord
-                    texture.width,  // TODO: replace with calculated width from texture coords
-                    texture.height, // TODO: replace with calculated height from texture coords
-                    texture.width / -2,
-                    texture.height / -2,
-                    texture.width,
-                    texture.height
+                    coords.left,
+                    coords.top,
+                    coords.width,
+                    coords.height,
+                    coords.width / -2,
+                    coords.height / -2,
+                    coords.width,
+                    coords.height
                 );
             }
             
