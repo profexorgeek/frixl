@@ -46,3 +46,5 @@ To use Frixl you extend its core objects such as Positionables, Sprites, Views a
 - Sprites should support animation
 - Views should track non-sprites: array should be Positionable instead of Sprite?
 - Simple collision implementation
+- Implement input (mouse and keyboard) listening
+- Implement audio
