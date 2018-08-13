@@ -80,6 +80,10 @@ module Frixl {
                 this._activeView.update(this._gameTime.frameSeconds);
             }
 
+            if(this._camera) {
+                this._camera.update(this._gameTime.frameSeconds);
+            }
+
             this.draw();
         }
     
