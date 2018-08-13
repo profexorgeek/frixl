@@ -6,7 +6,6 @@ module Frixl {
 
         protected _canvas: HTMLCanvasElement;
         protected _fps: number;
-        protected _background: string;
         protected _paused: boolean;
         protected _gameTime: GameTime;
         protected _timer: any;
@@ -46,11 +45,10 @@ module Frixl {
             Game.instance.logger.debug('Frixl engine instance created.');
         }
     
-        initialize(canvas: HTMLCanvasElement, fps: number, background: string): void {
+        initialize(canvas: HTMLCanvasElement, fps: number): void {
             this.logger.debug('Initializing game.');
             this._canvas = canvas;
             this._fps = fps;
-            this._background = background;
             this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
@@ -87,7 +85,7 @@ module Frixl {
     
         draw(): void {
             if(this._activeView != null) {
-                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas, this._background);    
+                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas);    
             }
         }
 

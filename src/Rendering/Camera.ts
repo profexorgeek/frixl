@@ -4,6 +4,38 @@ namespace Frixl.Rendering {
 
     export class Camera extends Entities.Positionable {
         private _size: Util.Vector = new Util.Vector();
+        private _background: string = 'CornflowerBlue';
+
+        get background(): string {
+            return this._background;
+        }
+
+        set background(color: string) {
+            this._background = color;
+        }
+
+        get left(): number {
+            return this._position.x - (this._size.x / 2);
+        }
+
+        get right(): number {
+            return this._position.x + (this._size.x / 2);
+        }
+
+        get top(): number {
+            return this._position.y + (this._size.y / 2);
+        }
+
+        get bottom(): number {
+            return this._position.y - (this._size.y / 2);
+        }
+
+        get randomVectorInView(): Util.Vector {
+            return new Util.Vector(
+                Util.GameUtil.randomInRange(this.left, this.right),
+                Util.GameUtil.randomInRange(this.bottom, this.top)
+            );
+        }
 
         constructor(width: number, height: number) {
             super();

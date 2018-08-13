@@ -22,5 +22,11 @@ namespace Frixl.Util {
 
             return ret;
         }
+
+        static randomInRange(min: number, max: number): number {
+            let range = max - min;
+            let val = Math.random() * range;
+            return val + min;
+        }
     }
 }

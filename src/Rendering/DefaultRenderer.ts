@@ -6,13 +6,12 @@ namespace Frixl.Rendering {
 
         constructor() { }
 
-        draw(sprites: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement, background: string): void {
+        draw(sprites: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void {
             let context = canvas.getContext('2d');
             let camTransX = Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
             let camTransY = camera.y + (context.canvas.height / 2);
-            let fill = Util.GameUtil.empty(background) ? 'rgb(0,0,0,0)' : background;
 
-            context.fillStyle = fill;
+            context.fillStyle = camera.background;
             context.fillRect(0, 0, canvas.width, canvas.height);
 
             context.save();
