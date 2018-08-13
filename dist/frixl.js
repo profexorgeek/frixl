@@ -62,7 +62,6 @@ var Frixl;
             this._canvas = canvas;
             this._fps = fps;
             this._background = background;
-            this._textures = {};
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
@@ -83,6 +82,9 @@ var Frixl;
             this._gameTime.update();
             if (this._activeView) {
                 this._activeView.update(this._gameTime.frameSeconds);
+            }
+            if (this._camera) {
+                this._camera.update(this._gameTime.frameSeconds);
             }
             this.draw();
         };
