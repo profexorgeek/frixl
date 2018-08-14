@@ -12,6 +12,7 @@ declare namespace Frixl {
         protected _activeView: Views.View;
         static instance: Game;
         readonly camera: Rendering.Camera;
+        readonly renderer: Rendering.IRenderer;
         logger: Util.ILogger;
         activeView: Views.View;
         constructor();
@@ -62,16 +63,6 @@ declare namespace Frixl.Entities {
         update(delta: number): void;
     }
 }
-declare namespace Frixl.Rendering {
-    class TextureBuffer {
-        private static _instance;
-        private _textures;
-        static instance: TextureBuffer;
-        private constructor();
-        loadTexture(url: string, callback?: Function): void;
-        getTexture(url: string, callback?: Function): HTMLImageElement;
-    }
-}
 declare namespace Frixl.Entities {
     class Sprite extends Positionable {
         private _textureName;
@@ -109,7 +100,10 @@ declare namespace Frixl.Util {
 }
 declare namespace Frixl.Rendering {
     class DefaultRenderer implements IRenderer {
+        private _textures;
         constructor();
+        loadTexture(url: string, callback?: Function): void;
+        getTexture(url: string, callback?: Function): HTMLImageElement;
         draw(sprites: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void;
         drawSprite(sprite: Entities.Sprite, context: CanvasRenderingContext2D): void;
     }
@@ -117,6 +111,8 @@ declare namespace Frixl.Rendering {
 declare namespace Frixl.Rendering {
     interface IRenderer {
         draw(drawables: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void;
+        loadTexture(path: string, callback: Function): void;
+        getTexture(path: string): HTMLImageElement;
     }
 }
 declare namespace Frixl.Util {

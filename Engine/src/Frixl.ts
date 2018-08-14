@@ -25,6 +25,10 @@ namespace Frixl {
             return this._camera;
         }
 
+        get renderer(): Rendering.IRenderer {
+            return this._renderer;
+        }
+
         get logger(): Util.ILogger {
             return this._logger;
         }

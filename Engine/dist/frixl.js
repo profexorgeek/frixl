@@ -37,6 +37,13 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Game.prototype, "renderer", {
+            get: function () {
+                return this._renderer;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Game.prototype, "logger", {
             get: function () {
                 return this._logger;
@@ -288,65 +295,6 @@ var Frixl;
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
-    var Rendering;
-    (function (Rendering) {
-        var TextureBuffer = /** @class */ (function () {
-            function TextureBuffer() {
-                this._textures = {};
-            }
-            Object.defineProperty(TextureBuffer, "instance", {
-                get: function () {
-                    if (this._instance == null) {
-                        this._instance = new TextureBuffer();
-                    }
-                    return this._instance;
-                },
-                set: function (t) {
-                    this._instance = t;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            TextureBuffer.prototype.loadTexture = function (url, callback) {
-                if (callback === void 0) { callback = null; }
-                if (!(url in this._textures) || this._textures[url] === null) {
-                    Frixl.Game.instance.logger.debug('Loading texture: ' + url);
-                    var img_1 = new Image();
-                    var me_1 = this;
-                    img_1.src = url;
-                    img_1.onload = function () {
-                        Frixl.Game.instance.logger.debug('Texture loaded: ' + url);
-                        me_1._textures[url] = img_1;
-                        if (callback) {
-                            callback();
-                        }
-                    };
-                }
-                else {
-                    callback();
-                }
-            };
-            TextureBuffer.prototype.getTexture = function (url, callback) {
-                if (callback === void 0) { callback = null; }
-                var texture = null;
-                if ((url in this._textures) && this._textures[url] !== null) {
-                    texture = this._textures[url];
-                }
-                else {
-                    Frixl.Game.instance.logger.warn('Texture ' + url + ' was not found. It should be preloaded.');
-                }
-                return texture;
-            };
-            TextureBuffer._instance = null;
-            return TextureBuffer;
-        }());
-        Rendering.TextureBuffer = TextureBuffer;
-    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
-})(Frixl || (Frixl = {}));
-/// <reference path='../Rendering/TextureBuffer.ts' />
-var Frixl;
-/// <reference path='../Rendering/TextureBuffer.ts' />
-(function (Frixl) {
     var Entities;
     (function (Entities) {
         var Sprite = /** @class */ (function (_super) {
@@ -395,10 +343,9 @@ var Frixl;
                 },
                 set: function (name) {
                     this._textureName = name;
-                    var tb = Frixl.Rendering.TextureBuffer;
-                    var tex = tb.instance.getTexture(this._textureName);
+                    var tex = Frixl.Game.instance.renderer.getTexture(this._textureName);
                     if (tex === null) {
-                        throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
+                        throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
                     }
                     this._textureCoords.setFromTextureCoords(0, 0, tex.width, tex.height);
                 },
@@ -521,7 +468,38 @@ var Frixl;
     (function (Rendering) {
         var DefaultRenderer = /** @class */ (function () {
             function DefaultRenderer() {
+                this._textures = {};
             }
+            DefaultRenderer.prototype.loadTexture = function (url, callback) {
+                if (callback === void 0) { callback = null; }
+                if (!(url in this._textures) || this._textures[url] === null) {
+                    Frixl.Game.instance.logger.debug('Loading texture: ' + url);
+                    var img_1 = new Image();
+                    var me_1 = this;
+                    img_1.src = url;
+                    img_1.onload = function () {
+                        Frixl.Game.instance.logger.debug('Texture loaded: ' + url);
+                        me_1._textures[url] = img_1;
+                        if (callback) {
+                            callback();
+                        }
+                    };
+                }
+                else {
+                    callback();
+                }
+            };
+            DefaultRenderer.prototype.getTexture = function (url, callback) {
+                if (callback === void 0) { callback = null; }
+                var texture = null;
+                if ((url in this._textures) && this._textures[url] !== null) {
+                    texture = this._textures[url];
+                }
+                else {
+                    Frixl.Game.instance.logger.warn('Texture ' + url + ' was not found. It should be preloaded.');
+                }
+                return texture;
+            };
             DefaultRenderer.prototype.draw = function (sprites, camera, canvas) {
                 var context = canvas.getContext('2d');
                 var camTransX = Frixl.Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
@@ -538,7 +516,7 @@ var Frixl;
             DefaultRenderer.prototype.drawSprite = function (sprite, context) {
                 var texture = null;
                 if (!Frixl.Util.GameUtil.empty(sprite.textureName)) {
-                    texture = Rendering.TextureBuffer.instance.getTexture(sprite.textureName);
+                    texture = this.getTexture(sprite.textureName);
                 }
                 var transX = sprite.x;
                 var transY = Frixl.Util.GameUtil.invert(sprite.y);

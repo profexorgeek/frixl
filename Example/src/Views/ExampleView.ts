@@ -8,9 +8,7 @@ namespace Example.Views {
             super();
 
             Game.instance.logger.debug('ExampleView instantiated.');
-
-            // preload a texture
-            Frixl.Rendering.TextureBuffer.instance.loadTexture(this._textureUrl, this.spriteLoaded);
+            Game.instance.renderer.loadTexture(this._textureUrl, this.spriteLoaded);
         }
 
         spriteLoaded = () => {

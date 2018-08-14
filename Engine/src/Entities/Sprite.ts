@@ -1,5 +1,3 @@
-/// <reference path='../Rendering/TextureBuffer.ts' />
-
 namespace Frixl.Entities {
 
     export class Sprite extends Positionable {
@@ -35,14 +33,10 @@ namespace Frixl.Entities {
         }
         set textureName(name: string) {
             this._textureName = name;
-
-            let tb = Rendering.TextureBuffer;
-            let tex = tb.instance.getTexture(this._textureName);
-
+            let tex = Game.instance.renderer.getTexture(this._textureName);
             if(tex === null) {
-                throw "ERROR: supplied texture is not loaded. Textures must be preloaded with the TextureBuffer!";
+                throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
             }
-
             this._textureCoords.setFromTextureCoords(0, 0, tex.width, tex.height);
         }
 

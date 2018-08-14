@@ -58,8 +58,7 @@ var Example;
                     _this.addSprite(sprite);
                 };
                 Example.Game.instance.logger.debug('ExampleView instantiated.');
-                // preload a texture
-                Frixl.Rendering.TextureBuffer.instance.loadTexture(_this._textureUrl, _this.spriteLoaded);
+                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.spriteLoaded);
                 return _this;
             }
             return ExampleView;
