@@ -39,13 +39,9 @@ var Example;
             function ExampleView() {
                 var _this = _super.call(this) || this;
                 _this._textureUrl = './content/frostFlake.png';
-                _this.spriteLoaded = function () {
+                _this.textureLoaded = function () {
                     Example.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
-                    var sprite = new Frixl.Entities.Sprite(_this._textureUrl);
-                    sprite.rotation = 0.15;
-                    sprite.x = 0;
-                    sprite.y = 0;
-                    sprite.rotationVelocity = 0.125;
+                    _this._parentSprite = new Frixl.Entities.Sprite(_this._textureUrl);
                     for (var i = 0; i < 500; i += 1) {
                         var s = new Frixl.Entities.Sprite(_this._textureUrl);
                         var pos = Example.Game.instance.camera.randomVectorInView;
@@ -53,14 +49,24 @@ var Example;
                         s.y = pos.y;
                         s.alpha = Frixl.Util.GameUtil.randomInRange(0.25, 1);
                         s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
-                        s.attachTo(sprite);
+                        s.attachTo(_this._parentSprite);
                     }
-                    _this.addPositionable(sprite);
+                    _this.addPositionable(_this._parentSprite);
                 };
                 Example.Game.instance.logger.debug('ExampleView instantiated.');
-                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.spriteLoaded);
+                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.textureLoaded);
                 return _this;
             }
+            ExampleView.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
+                var input = Example.Game.instance.input;
+                if (input.keyDown(Frixl.Keys.Space)) {
+                    this._parentSprite.rotationVelocity = 0.25;
+                }
+                else {
+                    this._parentSprite.rotationVelocity = 0;
+                }
+            };
             return ExampleView;
         }(Frixl.Views.View));
         Views.ExampleView = ExampleView;

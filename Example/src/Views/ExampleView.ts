@@ -3,22 +3,19 @@ namespace Example.Views {
     export class ExampleView extends Frixl.Views.View {
 
         private _textureUrl: string = './content/frostFlake.png';
+        private _parentSprite: Frixl.Entities.Sprite;
 
         constructor() {
             super();
 
             Game.instance.logger.debug('ExampleView instantiated.');
-            Game.instance.renderer.loadTexture(this._textureUrl, this.spriteLoaded);
+            Game.instance.renderer.loadTexture(this._textureUrl, this.textureLoaded);
         }
 
-        spriteLoaded = () => {
+        textureLoaded = () => {
             Game.instance.logger.debug('Sprite texture loaded, adding to view.');
 
-            let sprite = new Frixl.Entities.Sprite(this._textureUrl);
-            sprite.rotation = 0.15;
-            sprite.x = 0;
-            sprite.y = 0;
-            sprite.rotationVelocity = 0.125;
+            this._parentSprite = new Frixl.Entities.Sprite(this._textureUrl);
 
             for(let i = 0; i < 500; i += 1) {
                 let s = new Frixl.Entities.Sprite(this._textureUrl);
@@ -27,11 +24,25 @@ namespace Example.Views {
                 s.y = pos.y;
                 s.alpha = Frixl.Util.GameUtil.randomInRange(0.25, 1);
                 s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
-                s.attachTo(sprite);
+                s.attachTo(this._parentSprite);
             }
 
-            this.addPositionable(sprite);
+            this.addPositionable(this._parentSprite);
         }
+
+        update(delta: number) {
+            super.update(delta);
+
+            let input = Game.instance.input;
+            if(input.keyDown(Frixl.Keys.Space)) {
+                this._parentSprite.rotationVelocity = 0.25;
+            }
+            else {
+                this._parentSprite.rotationVelocity = 0;
+            }
+        }
+
+
 
     }
 }

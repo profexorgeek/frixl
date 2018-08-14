@@ -44,6 +44,20 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Game.prototype, "input", {
+            get: function () {
+                return this._input;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Game.prototype, "canvas", {
+            get: function () {
+                return this._canvas;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Game.prototype, "logger", {
             get: function () {
                 return this._logger;
@@ -71,6 +85,7 @@ var Frixl;
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
             this._gameTime = new Frixl.GameTime();
+            this._input = new Frixl.Input();
             this.activeView = new Frixl.Views.View();
         };
         Game.prototype.start = function () {
@@ -86,11 +101,15 @@ var Frixl;
         };
         Game.prototype.update = function () {
             this._gameTime.update();
+            var delta = this._gameTime.frameSeconds;
             if (this._activeView) {
-                this._activeView.update(this._gameTime.frameSeconds);
+                this._activeView.update(delta);
             }
             if (this._camera) {
-                this._camera.update(this._gameTime.frameSeconds);
+                this._camera.update(delta);
+            }
+            if (this._input) {
+                this._input.update(delta);
             }
             this.draw();
         };
@@ -139,6 +158,137 @@ var Frixl;
         return GameTime;
     }());
     Frixl.GameTime = GameTime;
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Keys;
+    (function (Keys) {
+        Keys[Keys["Backspace"] = 8] = "Backspace";
+        Keys[Keys["Tab"] = 9] = "Tab";
+        Keys[Keys["Enter"] = 13] = "Enter";
+        Keys[Keys["Shift"] = 16] = "Shift";
+        Keys[Keys["Ctrl"] = 17] = "Ctrl";
+        Keys[Keys["Alt"] = 18] = "Alt";
+        Keys[Keys["PauseBreak"] = 19] = "PauseBreak";
+        Keys[Keys["CapsLock"] = 20] = "CapsLock";
+        Keys[Keys["Esc"] = 27] = "Esc";
+        Keys[Keys["Space"] = 32] = "Space";
+        Keys[Keys["PageUp"] = 33] = "PageUp";
+        Keys[Keys["PageDown"] = 34] = "PageDown";
+        Keys[Keys["End"] = 35] = "End";
+        Keys[Keys["Home"] = 36] = "Home";
+        Keys[Keys["Left"] = 37] = "Left";
+        Keys[Keys["Up"] = 38] = "Up";
+        Keys[Keys["Right"] = 39] = "Right";
+        Keys[Keys["Down"] = 40] = "Down";
+        Keys[Keys["Insert"] = 45] = "Insert";
+        Keys[Keys["Delete"] = 46] = "Delete";
+        Keys[Keys["Oem0"] = 48] = "Oem0";
+        Keys[Keys["Oem1"] = 49] = "Oem1";
+        Keys[Keys["Oem2"] = 50] = "Oem2";
+        Keys[Keys["Oem3"] = 51] = "Oem3";
+        Keys[Keys["Oem4"] = 52] = "Oem4";
+        Keys[Keys["Oem5"] = 53] = "Oem5";
+        Keys[Keys["Oem6"] = 54] = "Oem6";
+        Keys[Keys["Oem7"] = 55] = "Oem7";
+        Keys[Keys["Oem8"] = 56] = "Oem8";
+        Keys[Keys["Oem9"] = 57] = "Oem9";
+        Keys[Keys["A"] = 65] = "A";
+        Keys[Keys["B"] = 66] = "B";
+        Keys[Keys["C"] = 67] = "C";
+        Keys[Keys["D"] = 68] = "D";
+        Keys[Keys["E"] = 69] = "E";
+        Keys[Keys["F"] = 70] = "F";
+        Keys[Keys["G"] = 71] = "G";
+        Keys[Keys["H"] = 72] = "H";
+        Keys[Keys["I"] = 73] = "I";
+        Keys[Keys["J"] = 74] = "J";
+        Keys[Keys["K"] = 75] = "K";
+        Keys[Keys["L"] = 76] = "L";
+        Keys[Keys["M"] = 77] = "M";
+        Keys[Keys["N"] = 78] = "N";
+        Keys[Keys["O"] = 79] = "O";
+        Keys[Keys["P"] = 80] = "P";
+        Keys[Keys["Q"] = 81] = "Q";
+        Keys[Keys["R"] = 82] = "R";
+        Keys[Keys["S"] = 83] = "S";
+        Keys[Keys["T"] = 84] = "T";
+        Keys[Keys["U"] = 85] = "U";
+        Keys[Keys["V"] = 86] = "V";
+        Keys[Keys["W"] = 87] = "W";
+        Keys[Keys["X"] = 88] = "X";
+        Keys[Keys["Y"] = 89] = "Y";
+        Keys[Keys["Z"] = 90] = "Z";
+        Keys[Keys["Windows"] = 91] = "Windows";
+        Keys[Keys["RightClick"] = 93] = "RightClick";
+        Keys[Keys["Num0"] = 96] = "Num0";
+        Keys[Keys["Num1"] = 97] = "Num1";
+        Keys[Keys["Num2"] = 98] = "Num2";
+        Keys[Keys["Num3"] = 99] = "Num3";
+        Keys[Keys["Num4"] = 100] = "Num4";
+        Keys[Keys["Num5"] = 101] = "Num5";
+        Keys[Keys["Num6"] = 102] = "Num6";
+        Keys[Keys["Num7"] = 103] = "Num7";
+        Keys[Keys["Num8"] = 104] = "Num8";
+        Keys[Keys["Num9"] = 105] = "Num9";
+        Keys[Keys["NumStar"] = 106] = "NumStar";
+        Keys[Keys["NumPlus"] = 107] = "NumPlus";
+        Keys[Keys["NumMinus"] = 109] = "NumMinus";
+        Keys[Keys["NumPeriod"] = 110] = "NumPeriod";
+        Keys[Keys["NumSlash"] = 111] = "NumSlash";
+        Keys[Keys["F1"] = 112] = "F1";
+        Keys[Keys["F2"] = 113] = "F2";
+        Keys[Keys["F3"] = 114] = "F3";
+        Keys[Keys["F4"] = 115] = "F4";
+        Keys[Keys["F5"] = 116] = "F5";
+        Keys[Keys["F6"] = 117] = "F6";
+        Keys[Keys["F7"] = 118] = "F7";
+        Keys[Keys["F8"] = 119] = "F8";
+        Keys[Keys["F9"] = 120] = "F9";
+        Keys[Keys["F10"] = 121] = "F10";
+        Keys[Keys["F11"] = 122] = "F11";
+        Keys[Keys["F12"] = 123] = "F12";
+        Keys[Keys["NumLock"] = 144] = "NumLock";
+        Keys[Keys["ScrollLock"] = 145] = "ScrollLock";
+        Keys[Keys["MyComputer"] = 182] = "MyComputer";
+        Keys[Keys["MyCalculator"] = 183] = "MyCalculator";
+        Keys[Keys["Semicolon"] = 186] = "Semicolon";
+        Keys[Keys["Equal"] = 187] = "Equal";
+        Keys[Keys["Comma"] = 188] = "Comma";
+        Keys[Keys["Dash"] = 189] = "Dash";
+        Keys[Keys["Period"] = 190] = "Period";
+        Keys[Keys["ForwardSlash"] = 191] = "ForwardSlash";
+        Keys[Keys["Tick"] = 192] = "Tick";
+        Keys[Keys["LeftBracket"] = 219] = "LeftBracket";
+        Keys[Keys["Backslash"] = 220] = "Backslash";
+        Keys[Keys["RightBracket"] = 221] = "RightBracket";
+        Keys[Keys["SingleQuote"] = 222] = "SingleQuote";
+    })(Keys = Frixl.Keys || (Frixl.Keys = {}));
+    var Input = /** @class */ (function () {
+        function Input() {
+            var _this = this;
+            this._keysDown = {};
+            this._buttonsDown = {};
+            this.onKeyDown = function (e) {
+                var keyName = Keys[e.keyCode];
+                _this._keysDown[keyName] = true;
+            };
+            this.onKeyUp = function (e) {
+                var keyName = Keys[e.keyCode];
+                _this._keysDown[keyName] = false;
+            };
+            window.addEventListener("keydown", this.onKeyDown);
+            window.addEventListener("keyup", this.onKeyUp);
+        }
+        Input.prototype.update = function (delta) {
+        };
+        Input.prototype.keyDown = function (charCode) {
+            var keyName = Keys[charCode];
+            return this._keysDown[keyName] === true;
+        };
+        return Input;
+    }());
+    Frixl.Input = Input;
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {

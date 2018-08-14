@@ -10,6 +10,7 @@ namespace Frixl {
         protected _gameTime: GameTime;
         protected _timer: any;
         protected _camera: Rendering.Camera;
+        protected _input: Input;
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
@@ -27,6 +28,14 @@ namespace Frixl {
 
         get renderer(): Rendering.IRenderer {
             return this._renderer;
+        }
+
+        get input(): Input {
+            return this._input;
+        }
+
+        get canvas(): HTMLCanvasElement {
+            return this._canvas;
         }
 
         get logger(): Util.ILogger {
@@ -56,6 +65,7 @@ namespace Frixl {
             this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
+            this._input = new Input();
 
             this.activeView = new Views.View();
         }
@@ -75,13 +85,18 @@ namespace Frixl {
     
         update(): void {
             this._gameTime.update();
+            let delta = this._gameTime.frameSeconds;
             
             if(this._activeView) {
-                this._activeView.update(this._gameTime.frameSeconds);
+                this._activeView.update(delta);
             }
 
             if(this._camera) {
-                this._camera.update(this._gameTime.frameSeconds);
+                this._camera.update(delta);
+            }
+
+            if(this._input) {
+                this._input.update(delta);
             }
 
             this.draw();
