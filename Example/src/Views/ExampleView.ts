@@ -30,7 +30,7 @@ namespace Example.Views {
                 s.attachTo(sprite);
             }
 
-            this.addSprite(sprite);
+            this.addPositionable(sprite);
         }
 
     }

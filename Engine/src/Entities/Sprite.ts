@@ -3,16 +3,8 @@ namespace Frixl.Entities {
     export class Sprite extends Positionable {
         
         private _textureName: string;
-        private _layer: number = 0;
         private _alpha: number = 1;
         private _textureCoords: Util.Rectangle = new Util.Rectangle();
-
-        get layer(): number {
-            return this._layer;
-        }
-        set layer(l: number) {
-            this._layer = l;
-        }
 
         get alpha(): number {
             return this._alpha;

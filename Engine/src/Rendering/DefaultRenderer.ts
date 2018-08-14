@@ -29,7 +29,7 @@ namespace Frixl.Rendering {
             }
         }
 
-        public getTexture(url: string, callback: Function = null) : HTMLImageElement {
+        public getTexture(url: string) : HTMLImageElement {
             let texture: HTMLImageElement = null;
 
             if((url in this._textures) && this._textures[url] !== null) {
@@ -42,7 +42,7 @@ namespace Frixl.Rendering {
             return texture;
         }
 
-        draw(sprites: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void {
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void {
             let context = canvas.getContext('2d');
             let camTransX = Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
             let camTransY = camera.y + (context.canvas.height / 2);
@@ -52,28 +52,42 @@ namespace Frixl.Rendering {
 
             context.save();
             context.translate(camTransX, camTransY);
-            for(let i = 0; i < sprites.length; i++) {
-                this.drawSprite(sprites[i], context);
+            for(let i = 0; i < positionables.length; i++) {
+                this.drawPositionable(positionables[i], context);
             }
             context.restore();
         }
 
-        drawSprite(sprite: Entities.Sprite, context: CanvasRenderingContext2D) {
+        private drawPositionable(positionable: Entities.Positionable, context: CanvasRenderingContext2D): void {
+            let transX = positionable.x;
+            let transY = Util.GameUtil.invert(positionable.y);
+            let rot = Util.GameUtil.invert(positionable.rotation);
+
+            context.save();
+            context.translate(transX, transY);
+            context.rotate(rot);
+
+            // choose draw method based on type
+            if(positionable instanceof Entities.Sprite) {
+                this.drawSprite(positionable as Entities.Sprite, context);
+            }
+
+            for(let i = 0; i < positionable.children.length; i += 1) {
+                if(positionable.children[i] instanceof Entities.Sprite) {
+                    this.drawPositionable(positionable.children[i] as Entities.Sprite, context);
+                }
+            }
+
+            context.restore();
+        }
+
+        private drawSprite(sprite: Entities.Sprite, context: CanvasRenderingContext2D) {
             let texture: HTMLImageElement = null;
             if(!Util.GameUtil.empty(sprite.textureName)) {
                 texture = this.getTexture(sprite.textureName);
             }
-
-            let transX = sprite.x;
-            let transY = Util.GameUtil.invert(sprite.y);
-            let rotation = -sprite.rotation;
             let alpha = sprite.alpha;
-
-            context.save();
-            context.translate(transX, transY);
-            context.rotate(rotation);
             context.globalAlpha = alpha;
-
             if(texture) {
                 let coords = sprite.textureCoords;
                 context.drawImage(
@@ -88,18 +102,7 @@ namespace Frixl.Rendering {
                     coords.height
                 );
             }
-            
-            // reset alpha before drawing children
             context.globalAlpha = 1;
-
-            // draw children
-            for(let i = 0; i < sprite.children.length; i += 1) {
-                if(sprite.children[i] instanceof Entities.Sprite) {
-                    this.drawSprite(sprite.children[i] as Entities.Sprite, context);
-                }
-            }
-
-            context.restore();
         }
     }
 }

@@ -96,7 +96,7 @@ var Frixl;
         };
         Game.prototype.draw = function () {
             if (this._activeView != null) {
-                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas);
+                this._renderer.draw(this._activeView.positionables, this._camera, this._canvas);
             }
         };
         Game.prototype.toString = function () {
@@ -152,6 +152,7 @@ var Frixl;
                 this._rotation = 0;
                 this._rotationVelocity = 0;
                 this._drag = 0;
+                this._layer = 0;
                 this._children = new Array();
                 this._parent = null;
             }
@@ -219,6 +220,16 @@ var Frixl;
                 },
                 set: function (y) {
                     this._position.y = y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "layer", {
+                get: function () {
+                    return this._layer;
+                },
+                set: function (l) {
+                    this._layer = l;
                 },
                 enumerable: true,
                 configurable: true
@@ -301,22 +312,11 @@ var Frixl;
             __extends(Sprite, _super);
             function Sprite(textureName) {
                 var _this = _super.call(this) || this;
-                _this._layer = 0;
                 _this._alpha = 1;
                 _this._textureCoords = new Frixl.Util.Rectangle();
                 _this.textureName = textureName;
                 return _this;
             }
-            Object.defineProperty(Sprite.prototype, "layer", {
-                get: function () {
-                    return this._layer;
-                },
-                set: function (l) {
-                    this._layer = l;
-                },
-                enumerable: true,
-                configurable: true
-            });
             Object.defineProperty(Sprite.prototype, "alpha", {
                 get: function () {
                     return this._alpha;
@@ -489,8 +489,7 @@ var Frixl;
                     callback();
                 }
             };
-            DefaultRenderer.prototype.getTexture = function (url, callback) {
-                if (callback === void 0) { callback = null; }
+            DefaultRenderer.prototype.getTexture = function (url) {
                 var texture = null;
                 if ((url in this._textures) && this._textures[url] !== null) {
                     texture = this._textures[url];
@@ -500,7 +499,7 @@ var Frixl;
                 }
                 return texture;
             };
-            DefaultRenderer.prototype.draw = function (sprites, camera, canvas) {
+            DefaultRenderer.prototype.draw = function (positionables, camera, canvas) {
                 var context = canvas.getContext('2d');
                 var camTransX = Frixl.Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
                 var camTransY = camera.y + (context.canvas.height / 2);
@@ -508,8 +507,26 @@ var Frixl;
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.save();
                 context.translate(camTransX, camTransY);
-                for (var i = 0; i < sprites.length; i++) {
-                    this.drawSprite(sprites[i], context);
+                for (var i = 0; i < positionables.length; i++) {
+                    this.drawPositionable(positionables[i], context);
+                }
+                context.restore();
+            };
+            DefaultRenderer.prototype.drawPositionable = function (positionable, context) {
+                var transX = positionable.x;
+                var transY = Frixl.Util.GameUtil.invert(positionable.y);
+                var rot = Frixl.Util.GameUtil.invert(positionable.rotation);
+                context.save();
+                context.translate(transX, transY);
+                context.rotate(rot);
+                // choose draw method based on type
+                if (positionable instanceof Frixl.Entities.Sprite) {
+                    this.drawSprite(positionable, context);
+                }
+                for (var i = 0; i < positionable.children.length; i += 1) {
+                    if (positionable.children[i] instanceof Frixl.Entities.Sprite) {
+                        this.drawPositionable(positionable.children[i], context);
+                    }
                 }
                 context.restore();
             };
@@ -518,27 +535,13 @@ var Frixl;
                 if (!Frixl.Util.GameUtil.empty(sprite.textureName)) {
                     texture = this.getTexture(sprite.textureName);
                 }
-                var transX = sprite.x;
-                var transY = Frixl.Util.GameUtil.invert(sprite.y);
-                var rotation = -sprite.rotation;
                 var alpha = sprite.alpha;
-                context.save();
-                context.translate(transX, transY);
-                context.rotate(rotation);
                 context.globalAlpha = alpha;
                 if (texture) {
                     var coords = sprite.textureCoords;
                     context.drawImage(texture, coords.left, coords.top, coords.width, coords.height, coords.width / -2, coords.height / -2, coords.width, coords.height);
                 }
-                // reset alpha before drawing children
                 context.globalAlpha = 1;
-                // draw children
-                for (var i = 0; i < sprite.children.length; i += 1) {
-                    if (sprite.children[i] instanceof Frixl.Entities.Sprite) {
-                        this.drawSprite(sprite.children[i], context);
-                    }
-                }
-                context.restore();
             };
             return DefaultRenderer;
         }());
@@ -755,56 +758,54 @@ var Frixl;
         Util.Vector = Vector;
     })(Util = Frixl.Util || (Frixl.Util = {}));
 })(Frixl || (Frixl = {}));
-///<reference path='../Entities/Sprite.ts' />
 var Frixl;
-///<reference path='../Entities/Sprite.ts' />
 (function (Frixl) {
     var Views;
     (function (Views) {
         var View = /** @class */ (function () {
             function View() {
-                this._sprites = new Array();
+                this._positionables = new Array();
             }
-            Object.defineProperty(View.prototype, "sprites", {
+            Object.defineProperty(View.prototype, "positionables", {
                 get: function () {
-                    return this._sprites;
+                    return this._positionables;
                 },
                 enumerable: true,
                 configurable: true
             });
             View.prototype.update = function (delta) {
-                for (var i = this._sprites.length - 1; i > -1; i -= 1) {
-                    this._sprites[i].update(delta);
+                for (var i = this._positionables.length - 1; i > -1; i -= 1) {
+                    this._positionables[i].update(delta);
                 }
             };
-            View.prototype.addSprite = function (sprite) {
-                var drawLayer = this._sprites.length - 1;
-                for (var i = 0; i < this._sprites.length; i += 1) {
-                    if (sprite.layer < this._sprites[i].layer) {
+            View.prototype.addPositionable = function (positionable) {
+                var drawLayer = this._positionables.length - 1;
+                for (var i = 0; i < this._positionables.length; i += 1) {
+                    if (positionable.layer < this._positionables[i].layer) {
                         drawLayer = i;
                         break;
                     }
                 }
-                this._sprites.splice(drawLayer, 0, sprite);
+                this._positionables.splice(drawLayer, 0, positionable);
             };
             View.prototype.addSprites = function (sprites) {
                 for (var i = 0; i < sprites.length; i += 1) {
-                    this.addSprite(sprites[i]);
+                    this.addPositionable(sprites[i]);
                 }
             };
-            View.prototype.removeSprite = function (sprite) {
-                var index = this._sprites.indexOf(sprite);
+            View.prototype.removePositionable = function (positionable) {
+                var index = this._positionables.indexOf(positionable);
                 if (index >= 0) {
-                    this._sprites.splice(index, 1);
+                    this._positionables.splice(index, 1);
                 }
             };
             View.prototype.removeSprites = function (sprites) {
                 for (var i = 0; i < sprites.length; i++) {
-                    this.removeSprite(sprites[i]);
+                    this.removePositionable(sprites[i]);
                 }
             };
             View.prototype.clearSprites = function () {
-                this._sprites = new Array();
+                this._positionables = new Array();
             };
             return View;
         }());

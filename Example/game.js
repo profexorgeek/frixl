@@ -55,7 +55,7 @@ var Example;
                         s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
                         s.attachTo(sprite);
                     }
-                    _this.addSprite(sprite);
+                    _this.addPositionable(sprite);
                 };
                 Example.Game.instance.logger.debug('ExampleView instantiated.');
                 Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.spriteLoaded);

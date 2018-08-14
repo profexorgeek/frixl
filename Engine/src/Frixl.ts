@@ -89,7 +89,7 @@ namespace Frixl {
     
         draw(): void {
             if(this._activeView != null) {
-                this._renderer.draw(this._activeView.sprites, this._camera, this._canvas);    
+                this._renderer.draw(this._activeView.positionables, this._camera, this._canvas);    
             }
         }
 

@@ -7,6 +7,7 @@ namespace Frixl.Entities {
         protected _rotation: number = 0;
         protected _rotationVelocity: number = 0;
         protected _drag: number = 0;
+        protected _layer: number = 0;
         protected _children: Array<Positionable> = new Array<Positionable>();
         protected _parent: Positionable = null;
 
@@ -55,6 +56,13 @@ namespace Frixl.Entities {
         }
         set y(y: number) {
             this._position.y = y;
+        }
+
+        get layer(): number {
+            return this._layer;
+        }
+        set layer(l: number) {
+            this._layer = l;
         }
 
         get absolutePosition(): Util.Vector {

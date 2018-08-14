@@ -45,6 +45,7 @@ declare namespace Frixl.Entities {
         protected _rotation: number;
         protected _rotationVelocity: number;
         protected _drag: number;
+        protected _layer: number;
         protected _children: Array<Positionable>;
         protected _parent: Positionable;
         rotation: number;
@@ -54,6 +55,7 @@ declare namespace Frixl.Entities {
         parent: Positionable;
         x: number;
         y: number;
+        layer: number;
         readonly absolutePosition: Util.Vector;
         readonly absoluteRotation: number;
         addChild(c: Positionable): void;
@@ -66,10 +68,8 @@ declare namespace Frixl.Entities {
 declare namespace Frixl.Entities {
     class Sprite extends Positionable {
         private _textureName;
-        private _layer;
         private _alpha;
         private _textureCoords;
-        layer: number;
         alpha: number;
         textureCoords: Util.Rectangle;
         textureName: string;
@@ -103,14 +103,15 @@ declare namespace Frixl.Rendering {
         private _textures;
         constructor();
         loadTexture(url: string, callback?: Function): void;
-        getTexture(url: string, callback?: Function): HTMLImageElement;
-        draw(sprites: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void;
-        drawSprite(sprite: Entities.Sprite, context: CanvasRenderingContext2D): void;
+        getTexture(url: string): HTMLImageElement;
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void;
+        private drawPositionable;
+        private drawSprite;
     }
 }
 declare namespace Frixl.Rendering {
     interface IRenderer {
-        draw(drawables: Array<Entities.Sprite>, camera: Camera, canvas: HTMLCanvasElement): void;
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void;
         loadTexture(path: string, callback: Function): void;
         getTexture(path: string): HTMLImageElement;
     }
@@ -177,12 +178,12 @@ declare namespace Frixl.Util {
 }
 declare namespace Frixl.Views {
     class View {
-        private _sprites;
-        readonly sprites: Array<Entities.Sprite>;
+        private _positionables;
+        readonly positionables: Array<Entities.Positionable>;
         update(delta: number): void;
-        addSprite(sprite: Entities.Sprite): void;
+        addPositionable(positionable: Entities.Positionable): void;
         addSprites(sprites: Array<Entities.Sprite>): void;
-        removeSprite(sprite: Entities.Sprite): void;
+        removePositionable(positionable: Entities.Positionable): void;
         removeSprites(sprites: Array<Entities.Sprite>): void;
         clearSprites(): void;
     }
