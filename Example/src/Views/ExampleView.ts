@@ -4,6 +4,7 @@ namespace Example.Views {
 
         private _textureUrl: string = './content/frostFlake.png';
         private _parentSprite: Frixl.Entities.Sprite;
+        private _cursorSprite: Frixl.Entities.Sprite;
 
         constructor() {
             super();
@@ -17,6 +18,7 @@ namespace Example.Views {
             Game.instance.logger.debug('Sprite texture loaded, adding to view.');
 
             this._parentSprite = new Frixl.Entities.Sprite(this._textureUrl);
+            this._cursorSprite = new Frixl.Entities.Sprite(this._textureUrl);
 
             for(let i = 0; i < 500; i += 1) {
                 let s = new Frixl.Entities.Sprite(this._textureUrl);
@@ -29,12 +31,15 @@ namespace Example.Views {
             }
 
             this.addPositionable(this._parentSprite);
+            this.addPositionable(this._cursorSprite);
         }
 
         update(delta: number) {
             super.update(delta);
 
             let input = Game.instance.input;
+            let camera = Game.instance.camera;
+
             if(this._parentSprite) {
                 if(input.keyDown(Frixl.Input.Keys.Space)) {
                     this._parentSprite.rotationVelocity = 0.25;
@@ -42,6 +47,31 @@ namespace Example.Views {
                 else {
                     this._parentSprite.rotationVelocity = 0;
                 }
+            }
+
+            if(input.keyDown(Frixl.Input.Keys.Right)) {
+                camera.velocity.x = 100;
+            }
+            else if(input.keyDown(Frixl.Input.Keys.Left)) {
+                camera.velocity.x = -100;
+            }
+            else {
+                camera.velocity.x = 0;
+            }
+
+            if(input.keyDown(Frixl.Input.Keys.Up)) {
+                camera.velocity.y = 100;
+            }
+            else if(input.keyDown(Frixl.Input.Keys.Down)) {
+                camera.velocity.y = -100;
+            }
+            else {
+                camera.velocity.y = 0;
+            }
+
+            if(this._cursorSprite) {
+                this._cursorSprite.x = input.cursor.worldX;
+                this._cursorSprite.y = input.cursor.worldY;
             }
         }
     }

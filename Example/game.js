@@ -42,6 +42,7 @@ var Example;
                 _this.onTextureLoaded = function () {
                     Example.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
                     _this._parentSprite = new Frixl.Entities.Sprite(_this._textureUrl);
+                    _this._cursorSprite = new Frixl.Entities.Sprite(_this._textureUrl);
                     for (var i = 0; i < 500; i += 1) {
                         var s = new Frixl.Entities.Sprite(_this._textureUrl);
                         var pos = Example.Game.instance.camera.randomVectorInView;
@@ -52,6 +53,7 @@ var Example;
                         s.attachTo(_this._parentSprite);
                     }
                     _this.addPositionable(_this._parentSprite);
+                    _this.addPositionable(_this._cursorSprite);
                 };
                 Example.Game.instance.logger.debug('ExampleView instantiated.');
                 Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.onTextureLoaded);
@@ -60,6 +62,7 @@ var Example;
             ExampleView.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
                 var input = Example.Game.instance.input;
+                var camera = Example.Game.instance.camera;
                 if (this._parentSprite) {
                     if (input.keyDown(Frixl.Input.Keys.Space)) {
                         this._parentSprite.rotationVelocity = 0.25;
@@ -67,6 +70,28 @@ var Example;
                     else {
                         this._parentSprite.rotationVelocity = 0;
                     }
+                }
+                if (input.keyDown(Frixl.Input.Keys.Right)) {
+                    camera.velocity.x = 100;
+                }
+                else if (input.keyDown(Frixl.Input.Keys.Left)) {
+                    camera.velocity.x = -100;
+                }
+                else {
+                    camera.velocity.x = 0;
+                }
+                if (input.keyDown(Frixl.Input.Keys.Up)) {
+                    camera.velocity.y = 100;
+                }
+                else if (input.keyDown(Frixl.Input.Keys.Down)) {
+                    camera.velocity.y = -100;
+                }
+                else {
+                    camera.velocity.y = 0;
+                }
+                if (this._cursorSprite) {
+                    this._cursorSprite.x = input.cursor.worldX;
+                    this._cursorSprite.y = input.cursor.worldY;
                 }
             };
             return ExampleView;
