@@ -451,9 +451,21 @@ var Frixl;
                 this._keysDown = {};
                 this._keysPushed = {};
                 this._buttonsDown = {};
+                this._buttonsPushed = {};
                 this._cursor = new Input.Cursor();
                 this.onMouseMove = function (e) {
                     _this._cursor.updateLocation(e.offsetX, e.offsetY);
+                };
+                this.onMouseDown = function (e) {
+                    var buttonName = Input.MouseButtons[e.which];
+                    _this._buttonsDown[buttonName] = true;
+                };
+                this.onMouseUp = function (e) {
+                    var buttonName = Input.MouseButtons[e.which];
+                    // mark button as no longer down
+                    _this._buttonsDown[buttonName] = false;
+                    // mark button as having been pressed and then released
+                    _this._buttonsPushed[buttonName] = true;
                 };
                 this.onKeyDown = function (e) {
                     var keyName = Input.Keys[e.keyCode];
@@ -469,6 +481,8 @@ var Frixl;
                 window.addEventListener("keydown", this.onKeyDown);
                 window.addEventListener("keyup", this.onKeyUp);
                 window.addEventListener("mousemove", this.onMouseMove);
+                window.addEventListener("mousedown", this.onMouseDown);
+                window.addEventListener("mouseup", this.onMouseUp);
             }
             Object.defineProperty(InputHandler.prototype, "cursor", {
                 get: function () {
@@ -482,10 +496,26 @@ var Frixl;
                 for (var key in this._keysPushed) {
                     this._keysPushed[key] = false;
                 }
+                // clear buttons pushed every frame
+                for (var button in this._buttonsPushed) {
+                    this._buttonsPushed[button] = false;
+                }
             };
             InputHandler.prototype.keyDown = function (charCode) {
                 var keyName = Input.Keys[charCode];
                 return this._keysDown[keyName] === true;
+            };
+            InputHandler.prototype.keyPushed = function (charCode) {
+                var keyName = Input.Keys[charCode];
+                return this._keysPushed[keyName] === true;
+            };
+            InputHandler.prototype.buttonDown = function (buttonCode) {
+                var buttonName = Input.MouseButtons[buttonCode];
+                return this._buttonsDown[buttonName] === true;
+            };
+            InputHandler.prototype.buttonPushed = function (buttonCode) {
+                var buttonName = Input.MouseButtons[buttonCode];
+                return this._buttonsPushed[buttonName] === true;
             };
             return InputHandler;
         }());

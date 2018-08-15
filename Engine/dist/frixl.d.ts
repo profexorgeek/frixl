@@ -98,12 +98,18 @@ declare namespace Frixl.Input {
         private _keysDown;
         private _keysPushed;
         private _buttonsDown;
+        private _buttonsPushed;
         private _cursor;
         readonly cursor: Cursor;
         constructor();
         update(delta: number): void;
         keyDown(charCode: number): boolean;
+        keyPushed(charCode: number): boolean;
+        buttonDown(buttonCode: number): boolean;
+        buttonPushed(buttonCode: number): boolean;
         private onMouseMove;
+        private onMouseDown;
+        private onMouseUp;
         private onKeyDown;
         private onKeyUp;
     }
