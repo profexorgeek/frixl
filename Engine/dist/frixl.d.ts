@@ -81,14 +81,29 @@ declare namespace Frixl.Entities {
     }
 }
 declare namespace Frixl.Input {
+    class Cursor {
+        private _lastPosition;
+        private _position;
+        readonly x: number;
+        readonly y: number;
+        readonly changeX: number;
+        readonly changeY: number;
+        readonly worldX: number;
+        readonly worldY: number;
+        updateLocation(x: number, y: number): void;
+    }
+}
+declare namespace Frixl.Input {
     class InputHandler {
-        private _cursor;
         private _keysDown;
         private _keysPushed;
         private _buttonsDown;
+        private _cursor;
+        readonly cursor: Cursor;
         constructor();
         update(delta: number): void;
         keyDown(charCode: number): boolean;
+        private onMouseMove;
         private onKeyDown;
         private onKeyUp;
     }
@@ -197,6 +212,13 @@ declare namespace Frixl.Input {
         SingleQuote = 222
     }
 }
+declare namespace Frixl.Input {
+    enum MouseButtons {
+        Left = 1,
+        Middle = 2,
+        Right = 3
+    }
+}
 declare namespace Frixl.Rendering {
     class Camera extends Entities.Positionable {
         private _size;
@@ -206,6 +228,8 @@ declare namespace Frixl.Rendering {
         readonly right: number;
         readonly top: number;
         readonly bottom: number;
+        readonly width: number;
+        readonly height: number;
         readonly randomVectorInView: Util.Vector;
         constructor(width: number, height: number);
     }

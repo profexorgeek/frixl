@@ -2,14 +2,19 @@ namespace Frixl.Input {
 
     export class InputHandler {
 
-        private _cursor: Util.Vector;
         private _keysDown: any = {};
         private _keysPushed: any = {};
         private _buttonsDown: any = {};
+        private _cursor: Cursor = new Cursor();
+
+        get cursor(): Cursor {
+            return this._cursor;
+        }
 
         constructor() {
             window.addEventListener("keydown", this.onKeyDown);
             window.addEventListener("keyup", this.onKeyUp);
+            window.addEventListener("mousemove", this.onMouseMove);
         }
 
         update(delta: number) {
@@ -24,6 +29,9 @@ namespace Frixl.Input {
             return this._keysDown[keyName] === true;
         }
 
+        private onMouseMove = (e: MouseEvent) => {
+            this._cursor.updateLocation(e.offsetX, e.offsetY);
+        }
 
         private onKeyDown = (e: KeyboardEvent) => {
             let keyName = Input.Keys[e.keyCode];

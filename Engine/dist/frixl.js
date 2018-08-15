@@ -383,12 +383,78 @@ var Frixl;
 (function (Frixl) {
     var Input;
     (function (Input) {
+        var Cursor = /** @class */ (function () {
+            function Cursor() {
+                this._lastPosition = new Frixl.Util.Vector();
+                this._position = new Frixl.Util.Vector();
+            }
+            Object.defineProperty(Cursor.prototype, "x", {
+                get: function () {
+                    return this._position.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Cursor.prototype, "y", {
+                get: function () {
+                    return this._position.y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Cursor.prototype, "changeX", {
+                get: function () {
+                    return this._lastPosition.x - this._position.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Cursor.prototype, "changeY", {
+                get: function () {
+                    return this._lastPosition.y - this._position.y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Cursor.prototype, "worldX", {
+                get: function () {
+                    return Frixl.Game.instance.camera.x + this.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Cursor.prototype, "worldY", {
+                get: function () {
+                    return Frixl.Game.instance.camera.y + this.y;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Cursor.prototype.updateLocation = function (x, y) {
+                this._lastPosition.x = this._position.x;
+                this._lastPosition.y = this._position.y;
+                this._position.x = x - (Frixl.Game.instance.camera.width / 2);
+                this._position.y = Frixl.Util.GameUtil.invert(y) + (Frixl.Game.instance.camera.height / 2);
+            };
+            return Cursor;
+        }());
+        Input.Cursor = Cursor;
+    })(Input = Frixl.Input || (Frixl.Input = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Input;
+    (function (Input) {
         var InputHandler = /** @class */ (function () {
             function InputHandler() {
                 var _this = this;
                 this._keysDown = {};
                 this._keysPushed = {};
                 this._buttonsDown = {};
+                this._cursor = new Input.Cursor();
+                this.onMouseMove = function (e) {
+                    _this._cursor.updateLocation(e.offsetX, e.offsetY);
+                };
                 this.onKeyDown = function (e) {
                     var keyName = Input.Keys[e.keyCode];
                     _this._keysDown[keyName] = true;
@@ -402,7 +468,15 @@ var Frixl;
                 };
                 window.addEventListener("keydown", this.onKeyDown);
                 window.addEventListener("keyup", this.onKeyUp);
+                window.addEventListener("mousemove", this.onMouseMove);
             }
+            Object.defineProperty(InputHandler.prototype, "cursor", {
+                get: function () {
+                    return this._cursor;
+                },
+                enumerable: true,
+                configurable: true
+            });
             InputHandler.prototype.update = function (delta) {
                 // clear keys pushed every frame
                 for (var key in this._keysPushed) {
@@ -527,6 +601,18 @@ var Frixl;
         })(Keys = Input.Keys || (Input.Keys = {}));
     })(Input = Frixl.Input || (Frixl.Input = {}));
 })(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Input;
+    (function (Input) {
+        var MouseButtons;
+        (function (MouseButtons) {
+            MouseButtons[MouseButtons["Left"] = 1] = "Left";
+            MouseButtons[MouseButtons["Middle"] = 2] = "Middle";
+            MouseButtons[MouseButtons["Right"] = 3] = "Right";
+        })(MouseButtons = Input.MouseButtons || (Input.MouseButtons = {}));
+    })(Input = Frixl.Input || (Frixl.Input = {}));
+})(Frixl || (Frixl = {}));
 /// <reference path='../Entities/Positionable.ts' />
 var Frixl;
 /// <reference path='../Entities/Positionable.ts' />
@@ -578,6 +664,20 @@ var Frixl;
             Object.defineProperty(Camera.prototype, "bottom", {
                 get: function () {
                     return this._position.y - (this._size.y / 2);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "width", {
+                get: function () {
+                    return this._size.x;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Camera.prototype, "height", {
+                get: function () {
+                    return this._size.y;
                 },
                 enumerable: true,
                 configurable: true

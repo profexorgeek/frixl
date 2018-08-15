@@ -30,6 +30,14 @@ namespace Frixl.Rendering {
             return this._position.y - (this._size.y / 2);
         }
 
+        get width(): number {
+            return this._size.x;
+        }
+
+        get height(): number {
+            return this._size.y;
+        }
+
         get randomVectorInView(): Util.Vector {
             return new Util.Vector(
                 Util.GameUtil.randomInRange(this.left, this.right),
