@@ -69,6 +69,18 @@ namespace Example.Views {
                 camera.velocity.y = 0;
             }
 
+            if(input.buttonPushed(Frixl.Input.MouseButtons.Left)) {
+                camera.background = "Black";
+            }
+
+            if(input.keyPushed(Frixl.Input.Keys.C)) {
+                let r = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+                let g = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+                let b = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+
+                camera.background = "rgb(" + r + "," + g + "," + b + ")";
+            }
+
             if(this._cursorSprite) {
                 this._cursorSprite.x = input.cursor.worldX;
                 this._cursorSprite.y = input.cursor.worldY;

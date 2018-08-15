@@ -89,6 +89,15 @@ var Example;
                 else {
                     camera.velocity.y = 0;
                 }
+                if (input.buttonPushed(Frixl.Input.MouseButtons.Left)) {
+                    camera.background = "Black";
+                }
+                if (input.keyPushed(Frixl.Input.Keys.C)) {
+                    var r = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+                    var g = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+                    var b = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
+                    camera.background = "rgb(" + r + "," + g + "," + b + ")";
+                }
                 if (this._cursorSprite) {
                     this._cursorSprite.x = input.cursor.worldX;
                     this._cursorSprite.y = input.cursor.worldY;
