@@ -7,14 +7,14 @@ declare namespace Frixl {
         protected _gameTime: GameTime;
         protected _timer: any;
         protected _camera: Rendering.Camera;
-        protected _input: Input;
+        protected _input: Input.InputHandler;
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
         static instance: Game;
         readonly camera: Rendering.Camera;
         readonly renderer: Rendering.IRenderer;
-        readonly input: Input;
+        readonly input: Input.InputHandler;
         readonly canvas: HTMLCanvasElement;
         logger: Util.ILogger;
         activeView: Views.View;
@@ -40,7 +40,60 @@ declare namespace Frixl {
         update(): void;
     }
 }
-declare namespace Frixl {
+declare namespace Frixl.Entities {
+    class Positionable {
+        protected _position: Util.Vector;
+        protected _velocity: Util.Vector;
+        protected _acceleration: Util.Vector;
+        protected _rotation: number;
+        protected _rotationVelocity: number;
+        protected _drag: number;
+        protected _layer: number;
+        protected _children: Array<Positionable>;
+        protected _parent: Positionable;
+        rotation: number;
+        velocity: Util.Vector;
+        rotationVelocity: number;
+        readonly children: Array<Positionable>;
+        parent: Positionable;
+        x: number;
+        y: number;
+        layer: number;
+        readonly absolutePosition: Util.Vector;
+        readonly absoluteRotation: number;
+        addChild(c: Positionable): void;
+        removeChild(c: Positionable): void;
+        attachTo(p: Positionable): void;
+        detach(): void;
+        update(delta: number): void;
+    }
+}
+declare namespace Frixl.Entities {
+    class Sprite extends Positionable {
+        private _textureName;
+        private _alpha;
+        private _textureCoords;
+        alpha: number;
+        textureCoords: Util.Rectangle;
+        textureName: string;
+        constructor(textureName: string);
+        update(delta: number): void;
+    }
+}
+declare namespace Frixl.Input {
+    class InputHandler {
+        private _cursor;
+        private _keysDown;
+        private _keysPushed;
+        private _buttonsDown;
+        constructor();
+        update(delta: number): void;
+        keyDown(charCode: number): boolean;
+        private onKeyDown;
+        private onKeyUp;
+    }
+}
+declare namespace Frixl.Input {
     enum Keys {
         Backspace = 8,
         Tab = 9,
@@ -142,56 +195,6 @@ declare namespace Frixl {
         Backslash = 220,
         RightBracket = 221,
         SingleQuote = 222
-    }
-    class Input {
-        private _cursor;
-        private _keysDown;
-        private _buttonsDown;
-        constructor();
-        update(delta: number): void;
-        keyDown(charCode: number): boolean;
-        private onKeyDown;
-        private onKeyUp;
-    }
-}
-declare namespace Frixl.Entities {
-    class Positionable {
-        protected _position: Util.Vector;
-        protected _velocity: Util.Vector;
-        protected _acceleration: Util.Vector;
-        protected _rotation: number;
-        protected _rotationVelocity: number;
-        protected _drag: number;
-        protected _layer: number;
-        protected _children: Array<Positionable>;
-        protected _parent: Positionable;
-        rotation: number;
-        velocity: Util.Vector;
-        rotationVelocity: number;
-        readonly children: Array<Positionable>;
-        parent: Positionable;
-        x: number;
-        y: number;
-        layer: number;
-        readonly absolutePosition: Util.Vector;
-        readonly absoluteRotation: number;
-        addChild(c: Positionable): void;
-        removeChild(c: Positionable): void;
-        attachTo(p: Positionable): void;
-        detach(): void;
-        update(delta: number): void;
-    }
-}
-declare namespace Frixl.Entities {
-    class Sprite extends Positionable {
-        private _textureName;
-        private _alpha;
-        private _textureCoords;
-        alpha: number;
-        textureCoords: Util.Rectangle;
-        textureName: string;
-        constructor(textureName: string);
-        update(delta: number): void;
     }
 }
 declare namespace Frixl.Rendering {

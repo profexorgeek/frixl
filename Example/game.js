@@ -39,7 +39,7 @@ var Example;
             function ExampleView() {
                 var _this = _super.call(this) || this;
                 _this._textureUrl = './content/frostFlake.png';
-                _this.textureLoaded = function () {
+                _this.onTextureLoaded = function () {
                     Example.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
                     _this._parentSprite = new Frixl.Entities.Sprite(_this._textureUrl);
                     for (var i = 0; i < 500; i += 1) {
@@ -54,17 +54,19 @@ var Example;
                     _this.addPositionable(_this._parentSprite);
                 };
                 Example.Game.instance.logger.debug('ExampleView instantiated.');
-                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.textureLoaded);
+                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.onTextureLoaded);
                 return _this;
             }
             ExampleView.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
                 var input = Example.Game.instance.input;
-                if (input.keyDown(Frixl.Keys.Space)) {
-                    this._parentSprite.rotationVelocity = 0.25;
-                }
-                else {
-                    this._parentSprite.rotationVelocity = 0;
+                if (this._parentSprite) {
+                    if (input.keyDown(Frixl.Input.Keys.Space)) {
+                        this._parentSprite.rotationVelocity = 0.25;
+                    }
+                    else {
+                        this._parentSprite.rotationVelocity = 0;
+                    }
                 }
             };
             return ExampleView;

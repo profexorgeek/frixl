@@ -9,10 +9,11 @@ namespace Example.Views {
             super();
 
             Game.instance.logger.debug('ExampleView instantiated.');
-            Game.instance.renderer.loadTexture(this._textureUrl, this.textureLoaded);
+
+            Game.instance.renderer.loadTexture(this._textureUrl, this.onTextureLoaded);
         }
 
-        textureLoaded = () => {
+        onTextureLoaded = () => {
             Game.instance.logger.debug('Sprite texture loaded, adding to view.');
 
             this._parentSprite = new Frixl.Entities.Sprite(this._textureUrl);
@@ -34,15 +35,14 @@ namespace Example.Views {
             super.update(delta);
 
             let input = Game.instance.input;
-            if(input.keyDown(Frixl.Keys.Space)) {
-                this._parentSprite.rotationVelocity = 0.25;
-            }
-            else {
-                this._parentSprite.rotationVelocity = 0;
+            if(this._parentSprite) {
+                if(input.keyDown(Frixl.Input.Keys.Space)) {
+                    this._parentSprite.rotationVelocity = 0.25;
+                }
+                else {
+                    this._parentSprite.rotationVelocity = 0;
+                }
             }
         }
-
-
-
     }
 }

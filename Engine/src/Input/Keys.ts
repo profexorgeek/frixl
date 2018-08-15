@@ -1,5 +1,5 @@
-namespace Frixl {
-
+namespace Frixl.Input {
+    
     export enum Keys {
         Backspace = 8,
         Tab = 9,
@@ -101,36 +101,5 @@ namespace Frixl {
         Backslash = 220,
         RightBracket = 221,
         SingleQuote = 222
-    }
-
-    export class Input {
-
-        private _cursor: Util.Vector;
-        private _keysDown: any = {};
-        private _buttonsDown: any = {};
-
-        constructor() {
-            window.addEventListener("keydown", this.onKeyDown);
-            window.addEventListener("keyup", this.onKeyUp);
-        }
-
-        update(delta: number) {
-
-        }
-
-        keyDown(charCode: number) {
-            let keyName = Keys[charCode];
-            return this._keysDown[keyName] === true;
-        }
-
-        private onKeyDown = (e: KeyboardEvent) => {
-            let keyName = Keys[e.keyCode];
-            this._keysDown[keyName] = true;
-        }
-
-        private onKeyUp = (e: KeyboardEvent) => {
-            let keyName = Keys[e.keyCode];
-            this._keysDown[keyName] = false;
-        }
     }
 }

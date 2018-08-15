@@ -10,7 +10,7 @@ namespace Frixl {
         protected _gameTime: GameTime;
         protected _timer: any;
         protected _camera: Rendering.Camera;
-        protected _input: Input;
+        protected _input: Input.InputHandler;
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
@@ -30,7 +30,7 @@ namespace Frixl {
             return this._renderer;
         }
 
-        get input(): Input {
+        get input(): Input.InputHandler {
             return this._input;
         }
 
@@ -65,7 +65,7 @@ namespace Frixl {
             this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
-            this._input = new Input();
+            this._input = new Input.InputHandler();
 
             this.activeView = new Views.View();
         }
