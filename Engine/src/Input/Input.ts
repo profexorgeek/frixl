@@ -1,6 +1,6 @@
 namespace Frixl.Input {
 
-    export class InputHandler {
+    export class InputHandler implements IUpdateable {
 
         private _keysDown: any = {};
         private _keysPushed: any = {};

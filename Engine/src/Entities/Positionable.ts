@@ -1,6 +1,6 @@
 namespace Frixl.Entities {
 
-    export class Positionable {
+    export class Positionable implements IUpdateable {
         protected _position: Util.Vector = new Util.Vector();
         protected _velocity: Util.Vector = new Util.Vector();
         protected _acceleration: Util.Vector = new Util.Vector();

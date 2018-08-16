@@ -1,7 +1,7 @@
 
 namespace Frixl.Views {
 
-    export class View {
+    export class View implements IUpdateable {
         private _positionables: Array<Entities.Positionable> = new Array<Entities.Positionable>();
 
         get positionables(): Array<Entities.Positionable> {
