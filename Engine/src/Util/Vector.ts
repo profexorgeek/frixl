@@ -9,6 +9,22 @@ namespace Frixl.Util {
             this.y = y;
         }
 
+        subtract(v2: Vector) {
+            return new Vector(this.x - v2.x, this.y - v2.y);
+        }
+
+        add(v2: Vector) {
+            return new Vector(this.x + v2.x, this.y + v2.y);
+        }
+
+        divide(v2: Vector) {
+            return new Vector(this.x / v2.x, this.y / v2.y);
+        }
+
+        multiply(v2: Vector) {
+            return new Vector(this.x * v2.x, this.y * v2.y);
+        }
+
         toString(): string {
             return '[x:' + this.x + ', y:' + this.y + ']';
         }
