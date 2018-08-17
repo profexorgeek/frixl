@@ -82,27 +82,27 @@ namespace Frixl.Rendering {
         }
 
         private drawSprite(sprite: Entities.Sprite, context: CanvasRenderingContext2D) {
-            let texture: HTMLImageElement = null;
             if(!Util.GameUtil.empty(sprite.textureName)) {
-                texture = this.getTexture(sprite.textureName);
+                let texture = this.getTexture(sprite.textureName);
+                let alpha = sprite.alpha;
+
+                context.globalAlpha = alpha;
+                if(texture) {
+                    let coords = sprite.frame;
+                    context.drawImage(
+                        texture,
+                        coords.left,
+                        coords.top,
+                        coords.width,
+                        coords.height,
+                        coords.width / -2,
+                        coords.height / -2,
+                        coords.width,
+                        coords.height
+                    );
+                }
+                context.globalAlpha = 1;
             }
-            let alpha = sprite.alpha;
-            context.globalAlpha = alpha;
-            if(texture) {
-                let coords = sprite.textureCoords;
-                context.drawImage(
-                    texture,
-                    coords.left,
-                    coords.top,
-                    coords.width,
-                    coords.height,
-                    coords.width / -2,
-                    coords.height / -2,
-                    coords.width,
-                    coords.height
-                );
-            }
-            context.globalAlpha = 1;
         }
     }
 }

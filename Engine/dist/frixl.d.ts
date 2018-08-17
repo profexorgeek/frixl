@@ -40,8 +40,13 @@ declare namespace Frixl {
         update(): void;
     }
 }
+declare namespace Frixl {
+    interface IUpdateable {
+        update(delta: number): void;
+    }
+}
 declare namespace Frixl.Entities {
-    class Positionable {
+    class Positionable implements IUpdateable {
         protected _position: Util.Vector;
         protected _velocity: Util.Vector;
         protected _acceleration: Util.Vector;
@@ -72,11 +77,16 @@ declare namespace Frixl.Entities {
     class Sprite extends Positionable {
         private _textureName;
         private _alpha;
-        private _textureCoords;
+        private _frame;
+        private _animationList;
+        private _animationName;
         alpha: number;
-        textureCoords: Util.Rectangle;
+        animationList: Record<string, Rendering.Animation>;
+        animationName: string;
+        readonly currentAnimation: Rendering.Animation;
+        frame: Rendering.Frame;
         textureName: string;
-        constructor(textureName: string);
+        constructor(textureName?: string);
         update(delta: number): void;
     }
 }
@@ -94,7 +104,7 @@ declare namespace Frixl.Input {
     }
 }
 declare namespace Frixl.Input {
-    class InputHandler {
+    class InputHandler implements IUpdateable {
         private _keysDown;
         private _keysPushed;
         private _buttonsDown;
@@ -226,6 +236,27 @@ declare namespace Frixl.Input {
     }
 }
 declare namespace Frixl.Rendering {
+    class Animation implements IUpdateable {
+        private _name;
+        private _frames;
+        private _textureName;
+        private _secLeftInFrame;
+        private _frameIndex;
+        private _playing;
+        private _looping;
+        name: string;
+        frames: Array<Frame>;
+        frameIndex: number;
+        readonly currentFrame: Frame;
+        textureName: string;
+        looping: boolean;
+        start(): void;
+        stop(): void;
+        restart(): void;
+        update(delta: number): void;
+    }
+}
+declare namespace Frixl.Rendering {
     class Camera extends Entities.Positionable {
         private _size;
         private _background;
@@ -257,6 +288,38 @@ declare namespace Frixl.Rendering {
         draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void;
         private drawPositionable;
         private drawSprite;
+    }
+}
+declare namespace Frixl.Util {
+    class Rectangle {
+        private _left;
+        private _top;
+        private _right;
+        private _bottom;
+        private _position;
+        private _size;
+        readonly position: Vector;
+        readonly size: Vector;
+        readonly x: number;
+        readonly y: number;
+        readonly width: number;
+        readonly height: number;
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        constructor(x?: number, y?: number, width?: number, height?: number);
+        private updateSizeAndPosition;
+        setEdges(left: number, top: number, right: number, bottom: number): void;
+        setFromTextureCoords(left: number, top: number, width: number, height: number): void;
+    }
+}
+declare namespace Frixl.Rendering {
+    class Frame extends Frixl.Util.Rectangle {
+        private _frameSeconds;
+        frameSeconds: number;
+        constructor(left?: number, top?: number, width?: number, height?: number, seconds?: number);
+        update(delta: number): void;
     }
 }
 declare namespace Frixl.Rendering {
@@ -295,30 +358,6 @@ declare namespace Frixl.Util {
     }
 }
 declare namespace Frixl.Util {
-    class Rectangle {
-        private _left;
-        private _top;
-        private _right;
-        private _bottom;
-        private _position;
-        private _size;
-        readonly position: Vector;
-        readonly size: Vector;
-        readonly x: number;
-        readonly y: number;
-        readonly width: number;
-        readonly height: number;
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-        constructor(x?: number, y?: number, width?: number, height?: number);
-        private updateSizeAndPosition;
-        setEdges(left: number, top: number, right: number, bottom: number): void;
-        setFromTextureCoords(left: number, top: number, width: number, height: number): void;
-    }
-}
-declare namespace Frixl.Util {
     class Vector {
         x: number;
         y: number;
@@ -327,7 +366,7 @@ declare namespace Frixl.Util {
     }
 }
 declare namespace Frixl.Views {
-    class View {
+    class View implements IUpdateable {
         private _positionables;
         readonly positionables: Array<Entities.Positionable>;
         update(delta: number): void;

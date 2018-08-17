@@ -330,10 +330,15 @@ var Frixl;
         var Sprite = /** @class */ (function (_super) {
             __extends(Sprite, _super);
             function Sprite(textureName) {
+                if (textureName === void 0) { textureName = null; }
                 var _this = _super.call(this) || this;
                 _this._alpha = 1;
-                _this._textureCoords = new Frixl.Util.Rectangle();
-                _this.textureName = textureName;
+                _this._frame = new Frixl.Rendering.Frame();
+                _this._animationList = null;
+                _this._animationName = null;
+                if (textureName) {
+                    _this.textureName = textureName;
+                }
                 return _this;
             }
             Object.defineProperty(Sprite.prototype, "alpha", {
@@ -346,12 +351,43 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
-            Object.defineProperty(Sprite.prototype, "textureCoords", {
+            Object.defineProperty(Sprite.prototype, "animationList", {
                 get: function () {
-                    return this._textureCoords;
+                    return this._animationList;
                 },
-                set: function (rect) {
-                    this._textureCoords = rect;
+                set: function (l) {
+                    this._animationList = l;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "animationName", {
+                get: function () {
+                    return this._animationName;
+                },
+                set: function (name) {
+                    this._animationName = name;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "currentAnimation", {
+                get: function () {
+                    var a = null;
+                    if (this._animationList && !Frixl.Util.GameUtil.empty(this._animationName)) {
+                        a = this._animationList[this._animationName];
+                    }
+                    return a;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "frame", {
+                get: function () {
+                    return this._frame;
+                },
+                set: function (f) {
+                    this._frame = f;
                 },
                 enumerable: true,
                 configurable: true
@@ -366,13 +402,20 @@ var Frixl;
                     if (tex === null) {
                         throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
                     }
-                    this._textureCoords.setFromTextureCoords(0, 0, tex.width, tex.height);
+                    if (!this.currentAnimation) {
+                        this._frame = new Frixl.Rendering.Frame(0, 0, tex.width, tex.height);
+                    }
                 },
                 enumerable: true,
                 configurable: true
             });
             Sprite.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
+                if (this.currentAnimation) {
+                    this.currentAnimation.update(delta);
+                    this.textureName = this.currentAnimation.textureName;
+                    this.frame = this.currentAnimation.currentFrame;
+                }
             };
             return Sprite;
         }(Entities.Positionable));
@@ -643,6 +686,126 @@ var Frixl;
         })(MouseButtons = Input.MouseButtons || (Input.MouseButtons = {}));
     })(Input = Frixl.Input || (Frixl.Input = {}));
 })(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Rendering;
+    (function (Rendering) {
+        var Animation = /** @class */ (function () {
+            function Animation() {
+                this._name = '';
+                this._frames = new Array();
+                this._secLeftInFrame = 0;
+                this._frameIndex = -1;
+                this._playing = false;
+                this._looping = true;
+            }
+            Object.defineProperty(Animation.prototype, "name", {
+                get: function () {
+                    return this._name;
+                },
+                set: function (name) {
+                    this._name = name;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Animation.prototype, "frames", {
+                get: function () {
+                    return this._frames;
+                },
+                set: function (frames) {
+                    this._frames = frames;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Animation.prototype, "frameIndex", {
+                get: function () {
+                    while (this._frameIndex > this._frames.length) {
+                        this._frameIndex -= this._frames.length;
+                    }
+                    return this._frameIndex;
+                },
+                set: function (i) {
+                    while (i > this._frames.length) {
+                        i -= this._frames.length;
+                    }
+                    this._frameIndex = i;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Animation.prototype, "currentFrame", {
+                get: function () {
+                    var f = null;
+                    if (this._frames) {
+                        f = this._frames[this._frameIndex];
+                    }
+                    return f;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Animation.prototype, "textureName", {
+                get: function () {
+                    return this._textureName;
+                },
+                set: function (name) {
+                    this._textureName = name;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Animation.prototype, "looping", {
+                get: function () {
+                    return this._looping;
+                },
+                set: function (looping) {
+                    this._looping = looping;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Animation.prototype.start = function () {
+                if (this._frameIndex < 0) {
+                    this.restart();
+                }
+                this._playing = true;
+            };
+            Animation.prototype.stop = function () {
+                this._playing = false;
+            };
+            Animation.prototype.restart = function () {
+                this._frameIndex = 0;
+                this._secLeftInFrame = this.currentFrame.frameSeconds;
+                this._playing = true;
+            };
+            Animation.prototype.update = function (delta) {
+                if (this._playing && this._frames && this._frames.length > 1) {
+                    this._secLeftInFrame -= delta;
+                    while (this._secLeftInFrame <= 0) {
+                        if (this._frameIndex < this._frames.length - 1) {
+                            this._frameIndex += 1;
+                        }
+                        else {
+                            if (this._looping) {
+                                this._frameIndex = 0;
+                            }
+                        }
+                        this._secLeftInFrame += this.currentFrame.frameSeconds;
+                        // if we still have zero seconds in frame at this point
+                        // we will never exit this loop! Force exit
+                        if (this.currentFrame.frameSeconds <= 0) {
+                            break;
+                        }
+                    }
+                }
+            };
+            return Animation;
+        }());
+        Rendering.Animation = Animation;
+    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
+})(Frixl || (Frixl = {}));
 /// <reference path='../Entities/Positionable.ts' />
 var Frixl;
 /// <reference path='../Entities/Positionable.ts' />
@@ -828,86 +991,21 @@ var Frixl;
                 context.restore();
             };
             DefaultRenderer.prototype.drawSprite = function (sprite, context) {
-                var texture = null;
                 if (!Frixl.Util.GameUtil.empty(sprite.textureName)) {
-                    texture = this.getTexture(sprite.textureName);
+                    var texture = this.getTexture(sprite.textureName);
+                    var alpha = sprite.alpha;
+                    context.globalAlpha = alpha;
+                    if (texture) {
+                        var coords = sprite.frame;
+                        context.drawImage(texture, coords.left, coords.top, coords.width, coords.height, coords.width / -2, coords.height / -2, coords.width, coords.height);
+                    }
+                    context.globalAlpha = 1;
                 }
-                var alpha = sprite.alpha;
-                context.globalAlpha = alpha;
-                if (texture) {
-                    var coords = sprite.textureCoords;
-                    context.drawImage(texture, coords.left, coords.top, coords.width, coords.height, coords.width / -2, coords.height / -2, coords.width, coords.height);
-                }
-                context.globalAlpha = 1;
             };
             return DefaultRenderer;
         }());
         Rendering.DefaultRenderer = DefaultRenderer;
     })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
-})(Frixl || (Frixl = {}));
-var Frixl;
-(function (Frixl) {
-    var Util;
-    (function (Util) {
-        var DefaultLogger = /** @class */ (function () {
-            function DefaultLogger() {
-                this._level = Util.LogLevel.Debug;
-            }
-            Object.defineProperty(DefaultLogger.prototype, "loglevel", {
-                get: function () {
-                    return this._level;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(DefaultLogger.prototype, "logLevel", {
-                set: function (level) {
-                    this._level = level;
-                },
-                enumerable: true,
-                configurable: true
-            });
-            DefaultLogger.prototype.debug = function (msg) {
-                if (this._level <= Util.LogLevel.Debug) {
-                    this.log('DEBUG: ' + msg);
-                }
-            };
-            DefaultLogger.prototype.info = function (msg) {
-                if (this._level <= Util.LogLevel.Info) {
-                    this.log('INFO: ' + msg);
-                }
-            };
-            DefaultLogger.prototype.warn = function (msg) {
-                if (this._level <= Util.LogLevel.Warn) {
-                    this.log('WARN: ' + msg);
-                }
-            };
-            DefaultLogger.prototype.error = function (msg) {
-                if (this._level <= Util.LogLevel.Error) {
-                    this.log('ERROR: ' + msg);
-                }
-            };
-            DefaultLogger.prototype.log = function (msg) {
-                console.log(msg);
-            };
-            return DefaultLogger;
-        }());
-        Util.DefaultLogger = DefaultLogger;
-    })(Util = Frixl.Util || (Frixl.Util = {}));
-})(Frixl || (Frixl = {}));
-var Frixl;
-(function (Frixl) {
-    var Util;
-    (function (Util) {
-        var LogLevel;
-        (function (LogLevel) {
-            LogLevel[LogLevel["Debug"] = 0] = "Debug";
-            LogLevel[LogLevel["Info"] = 1] = "Info";
-            LogLevel[LogLevel["Warn"] = 2] = "Warn";
-            LogLevel[LogLevel["Error"] = 3] = "Error";
-        })(LogLevel = Util.LogLevel || (Util.LogLevel = {}));
-        ;
-    })(Util = Frixl.Util || (Frixl.Util = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
@@ -1034,6 +1132,107 @@ var Frixl;
             return Rectangle;
         }());
         Util.Rectangle = Rectangle;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+/// <reference path='../Util/Rectangle.ts' />
+var Frixl;
+/// <reference path='../Util/Rectangle.ts' />
+(function (Frixl) {
+    var Rendering;
+    (function (Rendering) {
+        var Frame = /** @class */ (function (_super) {
+            __extends(Frame, _super);
+            function Frame(left, top, width, height, seconds) {
+                if (left === void 0) { left = 0; }
+                if (top === void 0) { top = 0; }
+                if (width === void 0) { width = 0; }
+                if (height === void 0) { height = 0; }
+                if (seconds === void 0) { seconds = 0; }
+                var _this = _super.call(this) || this;
+                _this._frameSeconds = 0;
+                _this.setFromTextureCoords(left, top, width, height);
+                _this.frameSeconds = seconds;
+                return _this;
+            }
+            Object.defineProperty(Frame.prototype, "frameSeconds", {
+                get: function () {
+                    return this._frameSeconds;
+                },
+                set: function (time) {
+                    this._frameSeconds = time;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Frame.prototype.update = function (delta) {
+            };
+            return Frame;
+        }(Frixl.Util.Rectangle));
+        Rendering.Frame = Frame;
+    })(Rendering = Frixl.Rendering || (Frixl.Rendering = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var DefaultLogger = /** @class */ (function () {
+            function DefaultLogger() {
+                this._level = Util.LogLevel.Debug;
+            }
+            Object.defineProperty(DefaultLogger.prototype, "loglevel", {
+                get: function () {
+                    return this._level;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(DefaultLogger.prototype, "logLevel", {
+                set: function (level) {
+                    this._level = level;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            DefaultLogger.prototype.debug = function (msg) {
+                if (this._level <= Util.LogLevel.Debug) {
+                    this.log('DEBUG: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.info = function (msg) {
+                if (this._level <= Util.LogLevel.Info) {
+                    this.log('INFO: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.warn = function (msg) {
+                if (this._level <= Util.LogLevel.Warn) {
+                    this.log('WARN: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.error = function (msg) {
+                if (this._level <= Util.LogLevel.Error) {
+                    this.log('ERROR: ' + msg);
+                }
+            };
+            DefaultLogger.prototype.log = function (msg) {
+                console.log(msg);
+            };
+            return DefaultLogger;
+        }());
+        Util.DefaultLogger = DefaultLogger;
+    })(Util = Frixl.Util || (Frixl.Util = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Util;
+    (function (Util) {
+        var LogLevel;
+        (function (LogLevel) {
+            LogLevel[LogLevel["Debug"] = 0] = "Debug";
+            LogLevel[LogLevel["Info"] = 1] = "Info";
+            LogLevel[LogLevel["Warn"] = 2] = "Warn";
+            LogLevel[LogLevel["Error"] = 3] = "Error";
+        })(LogLevel = Util.LogLevel || (Util.LogLevel = {}));
+        ;
     })(Util = Frixl.Util || (Frixl.Util = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
