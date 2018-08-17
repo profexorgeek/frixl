@@ -3,14 +3,31 @@
 <head>
     <meta charset="utf-8">
     <title>Frixl Window</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
+    <style>
+        html, body, div, p, canvas {
+            border:0;
+            margin:0;
+            padding:0;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+    </style>
+
 </head>
 
 <body>
-    <canvas id="frixlCanvas" width="800px" height="600px"></canvas>
+    <canvas id="frixlCanvas" width="400px" height="400px"></canvas>
     <script src="../Engine/dist/frixl.js"></script>
     <script src="./game.js"></script>
     <script>
         window.onload = function () {
+
+            var c = document.getElementById("frixlCanvas");
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+
             var game = new Example.Game();
         }
     </script>
