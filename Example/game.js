@@ -19,7 +19,7 @@ var Example;
         }
         Config.spriteSheet = './content/spriteSheet.png';
         Config.worldSize = 5000;
-        Config.numStars = 5000;
+        Config.numStars = 100;
         Config.shipAccel = 150;
         Config.shipDrag = 0.65;
         return Config;
@@ -112,6 +112,7 @@ var Example;
             __extends(Star, _super);
             function Star() {
                 var _this = _super.call(this) || this;
+                _this._parallax = 0;
                 _this._starFrames = new Array(new Frixl.Rendering.Frame(96, 16, 16, 16), new Frixl.Rendering.Frame(112, 0, 16, 16));
                 _this.textureName = Example.Config.spriteSheet;
                 if (Math.random() < 0.1) {
@@ -122,8 +123,29 @@ var Example;
                 }
                 _this.alpha = Frixl.Util.GameUtil.randomInRange(0.2, 1);
                 _this.rotation = Frixl.Util.GameUtil.randomInRange(-1.5, 1.5);
+                _this._parallax = Frixl.Util.GameUtil.randomInRange(0, 0.75);
                 return _this;
             }
+            Star.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
+                var absPos = this.absolutePosition;
+                var cam = Example.Game.instance.camera;
+                if (absPos.x > cam.right) {
+                    this.x -= cam.width;
+                }
+                if (absPos.x < cam.left) {
+                    this.x += cam.width;
+                }
+                if (absPos.y > cam.top) {
+                    this.y -= cam.height;
+                }
+                if (absPos.y < cam.bottom) {
+                    this.y += cam.height;
+                }
+                var camD = cam.deltaPosition;
+                this._position.x += camD.x * this._parallax;
+                this._position.y += camD.y * this._parallax;
+            };
             return Star;
         }(Frixl.Entities.Sprite));
         Entities.Star = Star;
@@ -140,15 +162,15 @@ var Example;
                 _this._gameCursor = new Example.Entities.GameCursor();
                 _this._stars = new Array();
                 _this._player = new Example.Entities.Ship();
-                Example.Game.instance.camera.background = "rgb(50, 50, 50)";
+                var cam = Example.Game.instance.camera;
                 _this.addPositionable(_this._gameCursor);
                 _this.addPositionable(_this._player);
-                Example.Game.instance.camera.attachTo(_this._player);
-                var halfWorldSize = Example.Config.worldSize / 2;
+                cam.attachTo(_this._player);
+                cam.background = "rgb(50, 50, 50)";
                 for (var i = 0; i < Example.Config.numStars; i++) {
                     var s = new Example.Entities.Star;
-                    s.x = Frixl.Util.GameUtil.randomInRange(-halfWorldSize, halfWorldSize);
-                    s.y = Frixl.Util.GameUtil.randomInRange(-halfWorldSize, halfWorldSize);
+                    s.x = Frixl.Util.GameUtil.randomInRange(cam.left, cam.right);
+                    s.y = Frixl.Util.GameUtil.randomInRange(cam.bottom, cam.top);
                     _this._stars.push(s);
                     _this.addPositionable(s);
                 }
