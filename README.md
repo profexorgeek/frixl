@@ -37,13 +37,12 @@ To use Frixl you extend its core objects such as Positionables, Sprites, Views a
 - Camera: extends Positionable to provide a camera that can have position, velocity and acceleration
 - Sprite: base game entity that extends positionable to represent a drawable object.
 - Texture Coordinates: Sprites can be mapped to a portion of a spritesheet by specifying the texture coordinates for the sprite
+- Animation: sprites support frame-based animation
 - IRenderer: Rendering interface to render Sprites and provide a buffer for loaded textures. Allows game engine to accept custom renderer implementations.
 - DefaultRenderer: 2D Canvas rendering implementation that can recursively render infinitely nested Sprites.
 - Input: Enums for easy translation of human-readable names into character codes and methods to check input states in the game loop.
 
 ## Next Up
 - Views should have an unload method that is called before moving to another view
-- Sprites should support animation
-- Views should track non-sprites: array should be Positionable instead of Sprite?
 - Simple collision implementation
 - Implement audio
