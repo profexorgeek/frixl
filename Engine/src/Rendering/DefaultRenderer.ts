@@ -44,8 +44,8 @@ namespace Frixl.Rendering {
 
         draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void {
             let context = canvas.getContext('2d');
-            let camTransX = Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
-            let camTransY = camera.y + (context.canvas.height / 2);
+            let camTransX = Util.GameUtil.invert(camera.absolutePosition.x) + context.canvas.width / 2;
+            let camTransY = camera.absolutePosition.y + (context.canvas.height / 2);
 
             context.fillStyle = camera.background;
             context.fillRect(0, 0, canvas.width, canvas.height);

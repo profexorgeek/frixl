@@ -26,6 +26,20 @@ namespace Frixl.Entities {
             this._velocity = vel;
         }
 
+        get acceleration(): Util.Vector {
+            return this._acceleration;
+        }
+        set acceleration(accel: Util.Vector) {
+            this._acceleration = accel;
+        }
+
+        get drag(): number {
+            return this._drag;
+        }
+        set drag(d: number) {
+            this._drag = d;
+        }
+
         get rotationVelocity(): number {
             return this._rotationVelocity;
         }
@@ -69,8 +83,9 @@ namespace Frixl.Entities {
             let abs: Util.Vector = new Util.Vector();
 
             if(this._parent != null) {
-                abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x;
-                abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y;
+                let parentabs = this._parent.absolutePosition;
+                abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x + parentabs.x;
+                abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y + parentabs.y;
             }
             else {
                 abs.x = this._position.x;

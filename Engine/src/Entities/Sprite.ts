@@ -4,7 +4,7 @@ namespace Frixl.Entities {
         
         private _textureName: string;
         private _alpha: number = 1;
-        private _frame: Rendering.Frame = new Rendering.Frame();
+        private _frame: Rendering.Frame = null;
         private _animationList: Record<string, Rendering.Animation> = null;
         private _animationName: string = null;
 
@@ -54,7 +54,7 @@ namespace Frixl.Entities {
                 throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
             }
 
-            if(!this.currentAnimation) {
+            if(!this._frame) {
                 this._frame = new Rendering.Frame(0, 0, tex.width, tex.height);
             }
         }

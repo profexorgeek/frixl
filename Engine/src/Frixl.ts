@@ -14,6 +14,7 @@ namespace Frixl {
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
+        protected _showCursor: boolean = true;
 
         static get instance(): Game {
             return this._instance;
@@ -50,6 +51,21 @@ namespace Frixl {
         }
         set activeView(view: Views.View) {
             this._activeView = view;
+        }
+
+        get showCursor(): boolean {
+            return this._showCursor;
+        }
+        set showCursor(show: boolean) {
+            this._showCursor = show;
+
+            if(!this._showCursor) {
+                this.canvas.style.cursor = "none";
+            }
+            else {
+                this.canvas.style.cursor = "inherit";
+            }
+            
         }
     
         constructor() {

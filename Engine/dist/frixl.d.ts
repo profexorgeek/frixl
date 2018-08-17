@@ -11,6 +11,7 @@ declare namespace Frixl {
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
+        protected _showCursor: boolean;
         static instance: Game;
         readonly camera: Rendering.Camera;
         readonly renderer: Rendering.IRenderer;
@@ -18,6 +19,7 @@ declare namespace Frixl {
         readonly canvas: HTMLCanvasElement;
         logger: Util.ILogger;
         activeView: Views.View;
+        showCursor: boolean;
         constructor();
         initialize(canvas: HTMLCanvasElement, fps: number): void;
         start(): void;
@@ -58,6 +60,8 @@ declare namespace Frixl.Entities {
         protected _parent: Positionable;
         rotation: number;
         velocity: Util.Vector;
+        acceleration: Util.Vector;
+        drag: number;
         rotationVelocity: number;
         readonly children: Array<Positionable>;
         parent: Positionable;

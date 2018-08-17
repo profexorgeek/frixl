@@ -16,6 +16,7 @@ var Frixl;
 (function (Frixl) {
     var Game = /** @class */ (function () {
         function Game() {
+            this._showCursor = true;
             Game.instance = this;
             this._logger = new Frixl.Util.DefaultLogger();
             Game.instance.logger.debug('Frixl engine instance created.');
@@ -74,6 +75,22 @@ var Frixl;
             },
             set: function (view) {
                 this._activeView = view;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Game.prototype, "showCursor", {
+            get: function () {
+                return this._showCursor;
+            },
+            set: function (show) {
+                this._showCursor = show;
+                if (!this._showCursor) {
+                    this.canvas.style.cursor = "none";
+                }
+                else {
+                    this.canvas.style.cursor = "inherit";
+                }
             },
             enumerable: true,
             configurable: true
@@ -196,6 +213,26 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Positionable.prototype, "acceleration", {
+                get: function () {
+                    return this._acceleration;
+                },
+                set: function (accel) {
+                    this._acceleration = accel;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "drag", {
+                get: function () {
+                    return this._drag;
+                },
+                set: function (d) {
+                    this._drag = d;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Object.defineProperty(Positionable.prototype, "rotationVelocity", {
                 get: function () {
                     return this._rotationVelocity;
@@ -257,8 +294,9 @@ var Frixl;
                 get: function () {
                     var abs = new Frixl.Util.Vector();
                     if (this._parent != null) {
-                        abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x;
-                        abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y;
+                        var parentabs = this._parent.absolutePosition;
+                        abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x + parentabs.x;
+                        abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y + parentabs.y;
                     }
                     else {
                         abs.x = this._position.x;
@@ -333,7 +371,7 @@ var Frixl;
                 if (textureName === void 0) { textureName = null; }
                 var _this = _super.call(this) || this;
                 _this._alpha = 1;
-                _this._frame = new Frixl.Rendering.Frame();
+                _this._frame = null;
                 _this._animationList = null;
                 _this._animationName = null;
                 if (textureName) {
@@ -402,7 +440,7 @@ var Frixl;
                     if (tex === null) {
                         throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
                     }
-                    if (!this.currentAnimation) {
+                    if (!this._frame) {
                         this._frame = new Frixl.Rendering.Frame(0, 0, tex.width, tex.height);
                     }
                 },
@@ -461,14 +499,14 @@ var Frixl;
             });
             Object.defineProperty(Cursor.prototype, "worldX", {
                 get: function () {
-                    return Frixl.Game.instance.camera.x + this.x;
+                    return Frixl.Game.instance.camera.absolutePosition.x + this.x;
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Cursor.prototype, "worldY", {
                 get: function () {
-                    return Frixl.Game.instance.camera.y + this.y;
+                    return Frixl.Game.instance.camera.absolutePosition.y + this.y;
                 },
                 enumerable: true,
                 configurable: true
@@ -961,8 +999,8 @@ var Frixl;
             };
             DefaultRenderer.prototype.draw = function (positionables, camera, canvas) {
                 var context = canvas.getContext('2d');
-                var camTransX = Frixl.Util.GameUtil.invert(camera.x) + context.canvas.width / 2;
-                var camTransY = camera.y + (context.canvas.height / 2);
+                var camTransX = Frixl.Util.GameUtil.invert(camera.absolutePosition.x) + context.canvas.width / 2;
+                var camTransY = camera.absolutePosition.y + (context.canvas.height / 2);
                 context.fillStyle = camera.background;
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 context.save();

@@ -21,11 +21,11 @@ namespace Frixl.Input {
         }
 
         get worldX(): number {
-            return Game.instance.camera.x + this.x;
+            return Game.instance.camera.absolutePosition.x + this.x;
         }
 
         get worldY(): number {
-            return Game.instance.camera.y + this.y;
+            return Game.instance.camera.absolutePosition.y + this.y;
         }
 
         updateLocation(x: number, y: number) {
