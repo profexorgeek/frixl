@@ -107,7 +107,10 @@ namespace Frixl {
                 this._activeView.update(delta);
             }
 
-            if(this._camera) {
+            // NOTE: we only update the camera if it doesn't have a parent
+            // otherwise the parent will update it too and update will be
+            // called twice
+            if(this._camera && !this.camera.parent) {
                 this._camera.update(delta);
             }
 

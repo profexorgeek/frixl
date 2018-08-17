@@ -270,6 +270,8 @@ declare namespace Frixl.Rendering {
     class Camera extends Entities.Positionable {
         private _size;
         private _background;
+        private _thisFramePos;
+        private _lastFramePos;
         background: string;
         readonly left: number;
         readonly right: number;
@@ -278,7 +280,9 @@ declare namespace Frixl.Rendering {
         readonly width: number;
         readonly height: number;
         readonly randomVectorInView: Util.Vector;
+        readonly deltaPosition: Util.Vector;
         constructor(width: number, height: number);
+        update(delta: number): void;
     }
 }
 declare namespace Frixl.Util {
@@ -372,6 +376,10 @@ declare namespace Frixl.Util {
         x: number;
         y: number;
         constructor(x?: number, y?: number);
+        subtract(v2: Vector): Vector;
+        add(v2: Vector): Vector;
+        divide(v2: Vector): Vector;
+        multiply(v2: Vector): Vector;
         toString(): string;
     }
 }

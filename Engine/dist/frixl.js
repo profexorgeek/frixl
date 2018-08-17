@@ -122,7 +122,10 @@ var Frixl;
             if (this._activeView) {
                 this._activeView.update(delta);
             }
-            if (this._camera) {
+            // NOTE: we only update the camera if it doesn't have a parent
+            // otherwise the parent will update it too and update will be
+            // called twice
+            if (this._camera && !this.camera.parent) {
                 this._camera.update(delta);
             }
             if (this._input) {
@@ -909,6 +912,8 @@ var Frixl;
                 var _this = _super.call(this) || this;
                 _this._size = new Frixl.Util.Vector();
                 _this._background = 'CornflowerBlue';
+                _this._thisFramePos = new Frixl.Util.Vector();
+                _this._lastFramePos = new Frixl.Util.Vector();
                 _this._size = new Frixl.Util.Vector(width, height);
                 _this._position = new Frixl.Util.Vector();
                 Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
@@ -926,28 +931,28 @@ var Frixl;
             });
             Object.defineProperty(Camera.prototype, "left", {
                 get: function () {
-                    return this._position.x - (this._size.x / 2);
+                    return this.absolutePosition.x - (this._size.x / 2);
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Camera.prototype, "right", {
                 get: function () {
-                    return this._position.x + (this._size.x / 2);
+                    return this.absolutePosition.x + (this._size.x / 2);
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Camera.prototype, "top", {
                 get: function () {
-                    return this._position.y + (this._size.y / 2);
+                    return this.absolutePosition.y + (this._size.y / 2);
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Camera.prototype, "bottom", {
                 get: function () {
-                    return this._position.y - (this._size.y / 2);
+                    return this.absolutePosition.y - (this._size.y / 2);
                 },
                 enumerable: true,
                 configurable: true
@@ -973,6 +978,19 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Camera.prototype, "deltaPosition", {
+                get: function () {
+                    return this._thisFramePos.subtract(this._lastFramePos);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Camera.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
+                this._lastFramePos.x = this._thisFramePos.x;
+                this._lastFramePos.y = this._thisFramePos.y;
+                this._thisFramePos = this.absolutePosition;
+            };
             return Camera;
         }(Frixl.Entities.Positionable));
         Rendering.Camera = Camera;
@@ -1337,6 +1355,18 @@ var Frixl;
                 this.x = x;
                 this.y = y;
             }
+            Vector.prototype.subtract = function (v2) {
+                return new Vector(this.x - v2.x, this.y - v2.y);
+            };
+            Vector.prototype.add = function (v2) {
+                return new Vector(this.x + v2.x, this.y + v2.y);
+            };
+            Vector.prototype.divide = function (v2) {
+                return new Vector(this.x / v2.x, this.y / v2.y);
+            };
+            Vector.prototype.multiply = function (v2) {
+                return new Vector(this.x * v2.x, this.y * v2.y);
+            };
             Vector.prototype.toString = function () {
                 return '[x:' + this.x + ', y:' + this.y + ']';
             };
