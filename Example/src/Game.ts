@@ -8,8 +8,14 @@ namespace Example {
             let canvas = document.getElementById('frixlCanvas') as HTMLCanvasElement;
             this.initialize(canvas, 60);
 
-            this.activeView = new Views.ExampleView();
+            this.showCursor = false;
 
+            this.renderer.loadTexture(Config.spriteSheet, this.onTexturesLoaded);
+        }
+
+        onTexturesLoaded = () => {
+            this.logger.debug('Game textures loaded.');
+            this.activeView = new Views.SpaceView();
             this.start();
         }
     }

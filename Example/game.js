@@ -12,6 +12,20 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var Example;
+(function (Example) {
+    var Config = /** @class */ (function () {
+        function Config() {
+        }
+        Config.spriteSheet = './content/spriteSheet.png';
+        Config.worldSize = 5000;
+        Config.numStars = 5000;
+        Config.shipAccel = 150;
+        Config.shipDrag = 0.65;
+        return Config;
+    }());
+    Example.Config = Config;
+})(Example || (Example = {}));
 /// <reference path='../../Engine/dist/frixl.d.ts' />
 var Example;
 /// <reference path='../../Engine/dist/frixl.d.ts' />
@@ -20,10 +34,15 @@ var Example;
         __extends(Game, _super);
         function Game() {
             var _this = _super.call(this) || this;
+            _this.onTexturesLoaded = function () {
+                _this.logger.debug('Game textures loaded.');
+                _this.activeView = new Example.Views.SpaceView();
+                _this.start();
+            };
             var canvas = document.getElementById('frixlCanvas');
             _this.initialize(canvas, 60);
-            _this.activeView = new Example.Views.ExampleView();
-            _this.start();
+            _this.showCursor = false;
+            _this.renderer.loadTexture(Example.Config.spriteSheet, _this.onTexturesLoaded);
             return _this;
         }
         return Game;
@@ -32,80 +51,112 @@ var Example;
 })(Example || (Example = {}));
 var Example;
 (function (Example) {
-    var Views;
-    (function (Views) {
-        var ExampleView = /** @class */ (function (_super) {
-            __extends(ExampleView, _super);
-            function ExampleView() {
+    var Entities;
+    (function (Entities) {
+        var GameCursor = /** @class */ (function (_super) {
+            __extends(GameCursor, _super);
+            function GameCursor() {
                 var _this = _super.call(this) || this;
-                _this._textureUrl = './content/frostFlake.png';
-                _this.onTextureLoaded = function () {
-                    Example.Game.instance.logger.debug('Sprite texture loaded, adding to view.');
-                    _this._parentSprite = new Frixl.Entities.Sprite(_this._textureUrl);
-                    _this._cursorSprite = new Frixl.Entities.Sprite(_this._textureUrl);
-                    for (var i = 0; i < 500; i += 1) {
-                        var s = new Frixl.Entities.Sprite(_this._textureUrl);
-                        var pos = Example.Game.instance.camera.randomVectorInView;
-                        s.x = pos.x;
-                        s.y = pos.y;
-                        s.alpha = Frixl.Util.GameUtil.randomInRange(0.25, 1);
-                        s.rotationVelocity = Frixl.Util.GameUtil.randomInRange(-Math.PI, Math.PI);
-                        s.attachTo(_this._parentSprite);
-                    }
-                    _this.addPositionable(_this._parentSprite);
-                    _this.addPositionable(_this._cursorSprite);
-                };
-                Example.Game.instance.logger.debug('ExampleView instantiated.');
-                Example.Game.instance.renderer.loadTexture(_this._textureUrl, _this.onTextureLoaded);
+                _this.textureName = Example.Config.spriteSheet;
+                _this.frame = new Frixl.Rendering.Frame(32, 0, 32, 32);
                 return _this;
             }
-            ExampleView.prototype.update = function (delta) {
+            GameCursor.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
+                this.rotationVelocity = 0.25;
+                this.x = Example.Game.instance.input.cursor.worldX;
+                this.y = Example.Game.instance.input.cursor.worldY;
+            };
+            return GameCursor;
+        }(Frixl.Entities.Sprite));
+        Entities.GameCursor = GameCursor;
+    })(Entities = Example.Entities || (Example.Entities = {}));
+})(Example || (Example = {}));
+var Example;
+(function (Example) {
+    var Entities;
+    (function (Entities) {
+        var Ship = /** @class */ (function (_super) {
+            __extends(Ship, _super);
+            function Ship() {
+                var _this = _super.call(this) || this;
+                _this.textureName = Example.Config.spriteSheet;
+                _this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
+                _this._drag = Example.Config.shipDrag;
+                return _this;
+            }
+            Ship.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
                 var input = Example.Game.instance.input;
-                var camera = Example.Game.instance.camera;
-                if (this._parentSprite) {
-                    if (input.keyDown(Frixl.Input.Keys.Space)) {
-                        this._parentSprite.rotationVelocity = 0.25;
-                    }
-                    else {
-                        this._parentSprite.rotationVelocity = 0;
-                    }
-                }
-                if (input.keyDown(Frixl.Input.Keys.Right)) {
-                    camera.velocity.x = 100;
-                }
-                else if (input.keyDown(Frixl.Input.Keys.Left)) {
-                    camera.velocity.x = -100;
+                var cursor = input.cursor;
+                this.rotation = Math.atan2(cursor.worldY - this.y, cursor.worldX - this.x);
+                if (input.buttonDown(Frixl.Input.MouseButtons.Left)) {
+                    this.acceleration.x = Math.cos(this.rotation) * Example.Config.shipAccel;
+                    this.acceleration.y = Math.sin(this.rotation) * Example.Config.shipAccel;
                 }
                 else {
-                    camera.velocity.x = 0;
-                }
-                if (input.keyDown(Frixl.Input.Keys.Up)) {
-                    camera.velocity.y = 100;
-                }
-                else if (input.keyDown(Frixl.Input.Keys.Down)) {
-                    camera.velocity.y = -100;
-                }
-                else {
-                    camera.velocity.y = 0;
-                }
-                if (input.buttonPushed(Frixl.Input.MouseButtons.Left)) {
-                    camera.background = "Black";
-                }
-                if (input.keyPushed(Frixl.Input.Keys.C)) {
-                    var r = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
-                    var g = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
-                    var b = Math.round(Frixl.Util.GameUtil.randomInRange(0, 255));
-                    camera.background = "rgb(" + r + "," + g + "," + b + ")";
-                }
-                if (this._cursorSprite) {
-                    this._cursorSprite.x = input.cursor.worldX;
-                    this._cursorSprite.y = input.cursor.worldY;
+                    this.acceleration.x = 0;
+                    this.acceleration.y = 0;
                 }
             };
-            return ExampleView;
+            return Ship;
+        }(Frixl.Entities.Sprite));
+        Entities.Ship = Ship;
+    })(Entities = Example.Entities || (Example.Entities = {}));
+})(Example || (Example = {}));
+var Example;
+(function (Example) {
+    var Entities;
+    (function (Entities) {
+        var Star = /** @class */ (function (_super) {
+            __extends(Star, _super);
+            function Star() {
+                var _this = _super.call(this) || this;
+                _this._starFrames = new Array(new Frixl.Rendering.Frame(96, 16, 16, 16), new Frixl.Rendering.Frame(112, 0, 16, 16));
+                _this.textureName = Example.Config.spriteSheet;
+                if (Math.random() < 0.1) {
+                    _this.frame = _this._starFrames[1];
+                }
+                else {
+                    _this.frame = _this._starFrames[0];
+                }
+                _this.alpha = Frixl.Util.GameUtil.randomInRange(0.2, 1);
+                _this.rotation = Frixl.Util.GameUtil.randomInRange(-1.5, 1.5);
+                return _this;
+            }
+            return Star;
+        }(Frixl.Entities.Sprite));
+        Entities.Star = Star;
+    })(Entities = Example.Entities || (Example.Entities = {}));
+})(Example || (Example = {}));
+var Example;
+(function (Example) {
+    var Views;
+    (function (Views) {
+        var SpaceView = /** @class */ (function (_super) {
+            __extends(SpaceView, _super);
+            function SpaceView() {
+                var _this = _super.call(this) || this;
+                _this._gameCursor = new Example.Entities.GameCursor();
+                _this._stars = new Array();
+                _this._player = new Example.Entities.Ship();
+                Example.Game.instance.camera.background = "rgb(50, 50, 50)";
+                _this.addPositionable(_this._gameCursor);
+                _this.addPositionable(_this._player);
+                Example.Game.instance.camera.attachTo(_this._player);
+                var halfWorldSize = Example.Config.worldSize / 2;
+                for (var i = 0; i < Example.Config.numStars; i++) {
+                    var s = new Example.Entities.Star;
+                    s.x = Frixl.Util.GameUtil.randomInRange(-halfWorldSize, halfWorldSize);
+                    s.y = Frixl.Util.GameUtil.randomInRange(-halfWorldSize, halfWorldSize);
+                    _this._stars.push(s);
+                    _this.addPositionable(s);
+                }
+                return _this;
+            }
+            return SpaceView;
         }(Frixl.Views.View));
-        Views.ExampleView = ExampleView;
+        Views.SpaceView = SpaceView;
     })(Views = Example.Views || (Example.Views = {}));
 })(Example || (Example = {}));
 //# sourceMappingURL=game.js.map
