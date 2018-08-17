@@ -114,6 +114,7 @@ declare namespace Frixl.Input {
         private _buttonsDown;
         private _buttonsPushed;
         private _cursor;
+        private _cursorInFrame;
         readonly cursor: Cursor;
         constructor();
         update(delta: number): void;
@@ -121,6 +122,11 @@ declare namespace Frixl.Input {
         keyPushed(charCode: number): boolean;
         buttonDown(buttonCode: number): boolean;
         buttonPushed(buttonCode: number): boolean;
+        private onEnterCanvas;
+        private onExitCanvas;
+        private onTouchMove;
+        private onTouchStart;
+        private onTouchEnd;
         private onMouseMove;
         private onMouseDown;
         private onMouseUp;

@@ -534,12 +534,51 @@ var Frixl;
                 this._buttonsDown = {};
                 this._buttonsPushed = {};
                 this._cursor = new Input.Cursor();
+                this._cursorInFrame = false;
+                this.onEnterCanvas = function (e) {
+                    _this._cursorInFrame = true;
+                };
+                this.onExitCanvas = function (e) {
+                    _this._cursorInFrame = false;
+                };
+                this.onTouchMove = function (e) {
+                    var t = e.touches[0];
+                    if (t) {
+                        _this._cursor.updateLocation(t.clientX, t.clientY);
+                    }
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
+                };
+                this.onTouchStart = function (e) {
+                    var t = e.touches[0];
+                    if (t) {
+                        _this._cursor.updateLocation(t.clientX, t.clientY);
+                    }
+                    _this._buttonsDown[Input.MouseButtons[Input.MouseButtons.Left]] = true;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
+                };
+                this.onTouchEnd = function (e) {
+                    var t = e.touches[0];
+                    if (t) {
+                        _this._cursor.updateLocation(t.clientX, t.clientY);
+                    }
+                    _this._buttonsDown[Input.MouseButtons[Input.MouseButtons.Left]] = false;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
+                };
                 this.onMouseMove = function (e) {
                     _this._cursor.updateLocation(e.offsetX, e.offsetY);
                 };
                 this.onMouseDown = function (e) {
                     var buttonName = Input.MouseButtons[e.which];
                     _this._buttonsDown[buttonName] = true;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
                 };
                 this.onMouseUp = function (e) {
                     var buttonName = Input.MouseButtons[e.which];
@@ -547,10 +586,16 @@ var Frixl;
                     _this._buttonsDown[buttonName] = false;
                     // mark button as having been pressed and then released
                     _this._buttonsPushed[buttonName] = true;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
                 };
                 this.onKeyDown = function (e) {
                     var keyName = Input.Keys[e.keyCode];
                     _this._keysDown[keyName] = true;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
                 };
                 this.onKeyUp = function (e) {
                     var keyName = Input.Keys[e.keyCode];
@@ -558,12 +603,20 @@ var Frixl;
                     _this._keysDown[keyName] = false;
                     // mark key as having been pressed and then released
                     _this._keysPushed[keyName] = true;
+                    if (_this._cursorInFrame) {
+                        e.preventDefault();
+                    }
                 };
                 window.addEventListener("keydown", this.onKeyDown);
                 window.addEventListener("keyup", this.onKeyUp);
                 window.addEventListener("mousemove", this.onMouseMove);
                 window.addEventListener("mousedown", this.onMouseDown);
                 window.addEventListener("mouseup", this.onMouseUp);
+                window.addEventListener("touchmove", this.onTouchMove, { passive: false });
+                window.addEventListener("touchstart", this.onTouchStart, { passive: false });
+                window.addEventListener("touchend", this.onTouchEnd, { passive: false });
+                Frixl.Game.instance.canvas.addEventListener("mouseenter", this.onEnterCanvas);
+                Frixl.Game.instance.canvas.addEventListener("mouseleave", this.onExitCanvas);
             }
             Object.defineProperty(InputHandler.prototype, "cursor", {
                 get: function () {

@@ -7,6 +7,7 @@ namespace Frixl.Input {
         private _buttonsDown: any = {};
         private _buttonsPushed: any = {};
         private _cursor: Cursor = new Cursor();
+        private _cursorInFrame: boolean = false;
 
         get cursor(): Cursor {
             return this._cursor;
@@ -18,6 +19,12 @@ namespace Frixl.Input {
             window.addEventListener("mousemove", this.onMouseMove);
             window.addEventListener("mousedown", this.onMouseDown);
             window.addEventListener("mouseup", this.onMouseUp);
+            window.addEventListener("touchmove", this.onTouchMove, {passive: false});
+            window.addEventListener("touchstart", this.onTouchStart, {passive: false});
+            window.addEventListener("touchend", this.onTouchEnd, {passive: false});
+
+            Game.instance.canvas.addEventListener("mouseenter", this.onEnterCanvas);
+            Game.instance.canvas.addEventListener("mouseleave", this.onExitCanvas);
         }
 
         update(delta: number) {
@@ -52,6 +59,50 @@ namespace Frixl.Input {
             return this._buttonsPushed[buttonName] === true;
         }
 
+        private onEnterCanvas = (e: MouseEvent) => {
+            this._cursorInFrame = true;
+        }
+
+        private onExitCanvas = (e: MouseEvent) => {
+            this._cursorInFrame = false;
+        }
+
+        private onTouchMove = (e: TouchEvent) => {
+            let t = e.touches[0];
+            if(t) {
+                this._cursor.updateLocation(t.clientX, t.clientY);
+            }
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
+        }
+
+        private onTouchStart = (e: TouchEvent) => {
+            let t = e.touches[0];
+            if(t) {
+                this._cursor.updateLocation(t.clientX, t.clientY);
+            }
+
+            this._buttonsDown[MouseButtons[MouseButtons.Left]] = true;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
+        }
+
+        private onTouchEnd = (e: TouchEvent) => {
+            let t = e.touches[0];
+            if(t) {
+                this._cursor.updateLocation(t.clientX, t.clientY);
+            }
+
+            this._buttonsDown[MouseButtons[MouseButtons.Left]] = false;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
+        }
 
         private onMouseMove = (e: MouseEvent) => {
             this._cursor.updateLocation(e.offsetX, e.offsetY);
@@ -60,6 +111,10 @@ namespace Frixl.Input {
         private onMouseDown = (e: MouseEvent) => {
             let buttonName = Input.MouseButtons[e.which];
             this._buttonsDown[buttonName] = true;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
         }
 
         private onMouseUp = (e: MouseEvent) => {
@@ -70,11 +125,19 @@ namespace Frixl.Input {
 
             // mark button as having been pressed and then released
             this._buttonsPushed[buttonName] = true;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
         }
 
         private onKeyDown = (e: KeyboardEvent) => {
             let keyName = Input.Keys[e.keyCode];
             this._keysDown[keyName] = true;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
         }
 
         private onKeyUp = (e: KeyboardEvent) => {
@@ -85,6 +148,10 @@ namespace Frixl.Input {
 
             // mark key as having been pressed and then released
             this._keysPushed[keyName] = true;
+
+            if(this._cursorInFrame) {
+                e.preventDefault();
+            }
         }
     }
 }
