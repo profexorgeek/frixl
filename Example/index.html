@@ -18,15 +18,17 @@
 </head>
 
 <body>
-    <canvas id="frixlCanvas" width="400px" height="400px"></canvas>
+    <canvas id="frixlCanvas" width="800px" height="600px"></canvas>
     <script src="../Engine/dist/frixl.js"></script>
     <script src="./game.js"></script>
     <script>
         window.onload = function () {
 
-            var c = document.getElementById("frixlCanvas");
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
+            if(/Mobi|Android/i.test(navigator.userAgent)) {
+                var c = document.getElementById("frixlCanvas");
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+            }
 
             var game = new Example.Game();
         }
