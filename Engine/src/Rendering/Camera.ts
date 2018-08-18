@@ -5,8 +5,9 @@ namespace Frixl.Rendering {
     export class Camera extends Entities.Positionable {
         private _size: Util.Vector = new Util.Vector();
         private _background: string = 'CornflowerBlue';
-        private _thisFramePos: Util.Vector = new Util.Vector();
+
         private _lastFramePos: Util.Vector = new Util.Vector();
+        private _positionDelta: Util.Vector = new Util.Vector();
 
 
         get background(): string {
@@ -48,10 +49,6 @@ namespace Frixl.Rendering {
             );
         }
 
-        get deltaPosition(): Util.Vector {
-            return this._thisFramePos.subtract(this._lastFramePos);
-        }
-
         constructor(width: number, height: number) {
             super();
             this._size = new Util.Vector(width, height);
@@ -62,9 +59,20 @@ namespace Frixl.Rendering {
         update(delta: number) {
             super.update(delta);
 
-            this._lastFramePos.x = this._thisFramePos.x;
-            this._lastFramePos.y = this._thisFramePos.y;
-            this._thisFramePos = this.absolutePosition;
+            // cache our position delta
+            this._positionDelta.x = this.absolutePosition.x - this._lastFramePos.x;
+            this._positionDelta.y = this.absolutePosition.y - this._lastFramePos.y;
+
+            // reset last frame position
+            this._lastFramePos.x = this.absolutePosition.x;
+            this._lastFramePos.y = this.absolutePosition.y;
+        }
+
+        getParallax(parallaxPercent: number): Util.Vector {
+            return new Util.Vector(
+                this._positionDelta.x * parallaxPercent,
+                this._positionDelta.y * parallaxPercent
+            );
         }
     }
 }

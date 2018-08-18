@@ -186,9 +186,13 @@ var Frixl;
         var Positionable = /** @class */ (function () {
             function Positionable() {
                 this._position = new Frixl.Util.Vector();
+                this._absolutePosition = new Frixl.Util.Vector();
+                this._absPosCalculatedThisFrame = false;
+                this._rotation = 0;
+                this._absoluteRotation = 0;
+                this._absRotCalculatedThisFrame = false;
                 this._velocity = new Frixl.Util.Vector();
                 this._acceleration = new Frixl.Util.Vector();
-                this._rotation = 0;
                 this._rotationVelocity = 0;
                 this._drag = 0;
                 this._layer = 0;
@@ -259,6 +263,9 @@ var Frixl;
                 },
                 set: function (p) {
                     this._parent = p;
+                    // force recalculation of absolutes
+                    this._absPosCalculatedThisFrame = false;
+                    this._absRotCalculatedThisFrame = false;
                 },
                 enumerable: true,
                 configurable: true
@@ -295,28 +302,43 @@ var Frixl;
             });
             Object.defineProperty(Positionable.prototype, "absolutePosition", {
                 get: function () {
-                    var abs = new Frixl.Util.Vector();
-                    if (this._parent != null) {
-                        var parentabs = this._parent.absolutePosition;
-                        abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x + parentabs.x;
-                        abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y + parentabs.y;
+                    // calculate and cache absolute position and update
+                    // flag that we've calculated it this frame. Flag will
+                    // be cleared every frame. This means that absolute
+                    // position will only be calculated 0 or 1 times/frame for perf
+                    if (!this._absPosCalculatedThisFrame) {
+                        if (this._parent != null) {
+                            var pAbs = this._parent.absolutePosition;
+                            this._absolutePosition.x = Math.cos(this._parent.absoluteRotation) * this._position.x + pAbs.x;
+                            this._absolutePosition.y = Math.sin(this._parent.absoluteRotation) * this._position.y + pAbs.y;
+                        }
+                        else {
+                            this._absolutePosition.x = this.x;
+                            this._absolutePosition.y = this.y;
+                        }
+                        this._absPosCalculatedThisFrame = true;
                     }
-                    else {
-                        abs.x = this._position.x;
-                        abs.y = this._position.y;
-                    }
-                    return abs;
+                    return this._absolutePosition;
                 },
                 enumerable: true,
                 configurable: true
             });
             Object.defineProperty(Positionable.prototype, "absoluteRotation", {
                 get: function () {
-                    var rot = this._rotation;
-                    if (this._parent != null) {
-                        rot += this._parent.absoluteRotation;
+                    // calculate and cache absolute rotation and update
+                    // flag that we've calculated it this frame. Flag will
+                    // be cleared every frame. This means that absolute
+                    // rotation will only be calculated 0 or 1 times/frame for perf
+                    if (!this._absRotCalculatedThisFrame) {
+                        if (this._parent != null) {
+                            this._absoluteRotation = this._parent.absoluteRotation + this._rotation;
+                            this._absRotCalculatedThisFrame = true;
+                        }
+                        else {
+                            this._absoluteRotation = this._rotation;
+                        }
                     }
-                    return rot;
+                    return this._absoluteRotation;
                 },
                 enumerable: true,
                 configurable: true
@@ -355,9 +377,16 @@ var Frixl;
                 while (this._rotation < 0) {
                     this._rotation += twoPi;
                 }
+                // sort children by layer
+                this._children.sort(function (a, b) {
+                    return a.layer - b.layer;
+                });
+                // update children
                 for (var i = 0; i < this._children.length; i += 1) {
                     this._children[i].update(delta);
                 }
+                // clear flag so absolute position is recalculated if accessed
+                this._absPosCalculatedThisFrame = false;
             };
             return Positionable;
         }());
@@ -912,8 +941,8 @@ var Frixl;
                 var _this = _super.call(this) || this;
                 _this._size = new Frixl.Util.Vector();
                 _this._background = 'CornflowerBlue';
-                _this._thisFramePos = new Frixl.Util.Vector();
                 _this._lastFramePos = new Frixl.Util.Vector();
+                _this._positionDelta = new Frixl.Util.Vector();
                 _this._size = new Frixl.Util.Vector(width, height);
                 _this._position = new Frixl.Util.Vector();
                 Frixl.Game.instance.logger.debug('Frixl camera created at size: ' + _this._size);
@@ -978,18 +1007,17 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
-            Object.defineProperty(Camera.prototype, "deltaPosition", {
-                get: function () {
-                    return this._thisFramePos.subtract(this._lastFramePos);
-                },
-                enumerable: true,
-                configurable: true
-            });
             Camera.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
-                this._lastFramePos.x = this._thisFramePos.x;
-                this._lastFramePos.y = this._thisFramePos.y;
-                this._thisFramePos = this.absolutePosition;
+                // cache our position delta
+                this._positionDelta.x = this.absolutePosition.x - this._lastFramePos.x;
+                this._positionDelta.y = this.absolutePosition.y - this._lastFramePos.y;
+                // reset last frame position
+                this._lastFramePos.x = this.absolutePosition.x;
+                this._lastFramePos.y = this.absolutePosition.y;
+            };
+            Camera.prototype.getParallax = function (parallaxPercent) {
+                return new Frixl.Util.Vector(this._positionDelta.x * parallaxPercent, this._positionDelta.y * parallaxPercent);
             };
             return Camera;
         }(Frixl.Entities.Positionable));
@@ -1391,6 +1419,9 @@ var Frixl;
                 configurable: true
             });
             View.prototype.update = function (delta) {
+                this._positionables.sort(function (a, b) {
+                    return a.layer - b.layer;
+                });
                 for (var i = this._positionables.length - 1; i > -1; i -= 1) {
                     this._positionables[i].update(delta);
                 }

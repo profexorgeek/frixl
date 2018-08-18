@@ -9,6 +9,10 @@ namespace Frixl.Views {
         }
 
         update(delta: number): void {
+            this._positionables.sort((a: Entities.Positionable, b: Entities.Positionable): number => {
+                return a.layer - b.layer;
+            });
+
             for(let i = this._positionables.length - 1; i > -1; i -= 1) {
                 this._positionables[i].update(delta);
             }

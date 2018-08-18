@@ -50,9 +50,13 @@ declare namespace Frixl {
 declare namespace Frixl.Entities {
     class Positionable implements IUpdateable {
         protected _position: Util.Vector;
+        protected _absolutePosition: Util.Vector;
+        protected _absPosCalculatedThisFrame: boolean;
+        protected _rotation: number;
+        protected _absoluteRotation: number;
+        protected _absRotCalculatedThisFrame: boolean;
         protected _velocity: Util.Vector;
         protected _acceleration: Util.Vector;
-        protected _rotation: number;
         protected _rotationVelocity: number;
         protected _drag: number;
         protected _layer: number;
@@ -270,8 +274,8 @@ declare namespace Frixl.Rendering {
     class Camera extends Entities.Positionable {
         private _size;
         private _background;
-        private _thisFramePos;
         private _lastFramePos;
+        private _positionDelta;
         background: string;
         readonly left: number;
         readonly right: number;
@@ -280,9 +284,9 @@ declare namespace Frixl.Rendering {
         readonly width: number;
         readonly height: number;
         readonly randomVectorInView: Util.Vector;
-        readonly deltaPosition: Util.Vector;
         constructor(width: number, height: number);
         update(delta: number): void;
+        getParallax(parallaxPercent: number): Util.Vector;
     }
 }
 declare namespace Frixl.Util {

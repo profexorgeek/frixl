@@ -2,11 +2,18 @@ namespace Frixl.Entities {
 
     export class Positionable implements IUpdateable {
         protected _position: Util.Vector = new Util.Vector();
+        protected _absolutePosition: Util.Vector = new Util.Vector();
+        protected _absPosCalculatedThisFrame: boolean = false;
+
+        protected _rotation: number = 0;
+        protected _absoluteRotation: number = 0
+        protected _absRotCalculatedThisFrame: boolean = false;
+
         protected _velocity: Util.Vector = new Util.Vector();
         protected _acceleration: Util.Vector = new Util.Vector();
-        protected _rotation: number = 0;
         protected _rotationVelocity: number = 0;
         protected _drag: number = 0;
+
         protected _layer: number = 0;
         protected _children: Array<Positionable> = new Array<Positionable>();
         protected _parent: Positionable = null;
@@ -56,6 +63,10 @@ namespace Frixl.Entities {
         }
         set parent(p: Positionable) {
             this._parent = p;
+
+            // force recalculation of absolutes
+            this._absPosCalculatedThisFrame = false;
+            this._absRotCalculatedThisFrame = false;
         }
 
         get x(): number {
@@ -80,27 +91,45 @@ namespace Frixl.Entities {
         }
 
         get absolutePosition(): Util.Vector {
-            let abs: Util.Vector = new Util.Vector();
 
-            if(this._parent != null) {
-                let parentabs = this._parent.absolutePosition;
-                abs.x = Math.cos(this._parent.absoluteRotation) * this._position.x + parentabs.x;
-                abs.y = Math.cos(this._parent.absoluteRotation) * this._position.y + parentabs.y;
-            }
-            else {
-                abs.x = this._position.x;
-                abs.y = this._position.y;
+            // calculate and cache absolute position and update
+            // flag that we've calculated it this frame. Flag will
+            // be cleared every frame. This means that absolute
+            // position will only be calculated 0 or 1 times/frame for perf
+            if(!this._absPosCalculatedThisFrame) {
+                if(this._parent != null) {
+                    let pAbs = this._parent.absolutePosition;
+                    this._absolutePosition.x = Math.cos(this._parent.absoluteRotation) * this._position.x + pAbs.x;
+                    this._absolutePosition.y = Math.sin(this._parent.absoluteRotation) * this._position.y + pAbs.y;
+                }
+                else {
+                    this._absolutePosition.x = this.x;
+                    this._absolutePosition.y = this.y;
+                }
+
+                this._absPosCalculatedThisFrame = true;
             }
             
-            return abs;
+            return this._absolutePosition;
         }
 
         get absoluteRotation(): number {
-            let rot: number = this._rotation;
-            if(this._parent != null) {
-                rot += this._parent.absoluteRotation;
+
+            // calculate and cache absolute rotation and update
+            // flag that we've calculated it this frame. Flag will
+            // be cleared every frame. This means that absolute
+            // rotation will only be calculated 0 or 1 times/frame for perf
+            if(!this._absRotCalculatedThisFrame) {
+                if(this._parent != null) {
+                    this._absoluteRotation = this._parent.absoluteRotation + this._rotation;
+                    this._absRotCalculatedThisFrame = true;
+                }
+                else {
+                    this._absoluteRotation = this._rotation;
+                }
             }
-            return rot;
+
+            return this._absoluteRotation;
         }
         // #endregion
 
@@ -148,9 +177,18 @@ namespace Frixl.Entities {
                 this._rotation += twoPi;
             }
 
+            // sort children by layer
+            this._children.sort((a: Positionable, b: Positionable): number => {
+                return a.layer - b.layer;
+            });
+
+            // update children
             for(let i = 0; i < this._children.length; i += 1) {
                 this._children[i].update(delta);
             }
+
+            // clear flag so absolute position is recalculated if accessed
+            this._absPosCalculatedThisFrame = false;
         }
     }
 
