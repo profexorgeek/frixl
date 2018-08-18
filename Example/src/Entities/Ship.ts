@@ -6,27 +6,14 @@ namespace Example.Entities {
         constructor() {
             super();
 
+            // get the spritesheet name from the config file
             this.textureName = Config.spriteSheet;
+
+            // hardcoded frame for the ship in the spritesheet
             this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
+
+            // give the ship some drag so it doesn't coast forever
             this._drag = Config.shipDrag;
         }
-
-        update(delta: number) {
-            super.update(delta);
-            let input = Game.instance.input;
-            let cursor = input.cursor;
-
-            this.rotation = Math.atan2(cursor.worldY - this.y, cursor.worldX - this.x);
-
-            if(input.buttonDown(Frixl.Input.MouseButtons.Left)) {
-                this.acceleration.x = Math.cos(this.rotation) * Config.shipAccel;
-                this.acceleration.y = Math.sin(this.rotation) * Config.shipAccel;
-            }
-            else {
-                this.acceleration.x = 0;
-                this.acceleration.y = 0;
-            }
-        }
-
     }
 }

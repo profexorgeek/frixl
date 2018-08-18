@@ -80,25 +80,14 @@ var Example;
             __extends(Ship, _super);
             function Ship() {
                 var _this = _super.call(this) || this;
+                // get the spritesheet name from the config file
                 _this.textureName = Example.Config.spriteSheet;
+                // hardcoded frame for the ship in the spritesheet
                 _this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
+                // give the ship some drag so it doesn't coast forever
                 _this._drag = Example.Config.shipDrag;
                 return _this;
             }
-            Ship.prototype.update = function (delta) {
-                _super.prototype.update.call(this, delta);
-                var input = Example.Game.instance.input;
-                var cursor = input.cursor;
-                this.rotation = Math.atan2(cursor.worldY - this.y, cursor.worldX - this.x);
-                if (input.buttonDown(Frixl.Input.MouseButtons.Left)) {
-                    this.acceleration.x = Math.cos(this.rotation) * Example.Config.shipAccel;
-                    this.acceleration.y = Math.sin(this.rotation) * Example.Config.shipAccel;
-                }
-                else {
-                    this.acceleration.x = 0;
-                    this.acceleration.y = 0;
-                }
-            };
             return Ship;
         }(Frixl.Entities.Sprite));
         Entities.Ship = Ship;
@@ -113,23 +102,28 @@ var Example;
             function Star() {
                 var _this = _super.call(this) || this;
                 _this._parallax = 0;
+                // hardcoded frames on the spritesheet
                 _this._starFrames = new Array(new Frixl.Rendering.Frame(96, 16, 16, 16), new Frixl.Rendering.Frame(112, 0, 16, 16));
                 _this.textureName = Example.Config.spriteSheet;
+                // pick a random star texture
                 if (Math.random() < 0.1) {
                     _this.frame = _this._starFrames[1];
                 }
                 else {
                     _this.frame = _this._starFrames[0];
                 }
-                _this.alpha = Frixl.Util.GameUtil.randomInRange(0.2, 1);
+                // randomize star's appearance
+                _this.alpha = Frixl.Util.GameUtil.randomInRange(0.4, 1);
                 _this.rotation = Frixl.Util.GameUtil.randomInRange(-1.5, 1.5);
-                _this._parallax = Frixl.Util.GameUtil.randomInRange(0, 0.75);
+                _this._parallax = Frixl.Util.GameUtil.randomInRange(0.25, 0.75);
                 return _this;
             }
             Star.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
+                // create some shortcut vars for readability
                 var absPos = this.absolutePosition;
                 var cam = Example.Game.instance.camera;
+                // wrap the star on the screen
                 if (absPos.x > cam.right) {
                     this.x -= cam.width;
                 }
@@ -142,9 +136,8 @@ var Example;
                 if (absPos.y < cam.bottom) {
                     this.y += cam.height;
                 }
-                var camD = cam.deltaPosition;
-                this._position.x += camD.x * this._parallax;
-                this._position.y += camD.y * this._parallax;
+                // apply some parallax movement to fake depth
+                this._position = this._position.add(cam.getParallax(this._parallax));
             };
             return Star;
         }(Frixl.Entities.Sprite));
@@ -162,11 +155,17 @@ var Example;
                 _this._gameCursor = new Example.Entities.GameCursor();
                 _this._stars = new Array();
                 _this._player = new Example.Entities.Ship();
+                // shortcut to camera
                 var cam = Example.Game.instance.camera;
+                // add the game cursor instance
                 _this.addPositionable(_this._gameCursor);
+                // add the player instance
                 _this.addPositionable(_this._player);
+                // attach the camera to the player
                 cam.attachTo(_this._player);
+                // set a custom background color
                 cam.background = "rgb(50, 50, 50)";
+                // create a bunch of stars with random properties
                 for (var i = 0; i < Example.Config.numStars; i++) {
                     var s = new Example.Entities.Star;
                     s.x = Frixl.Util.GameUtil.randomInRange(cam.left, cam.right);
@@ -174,8 +173,32 @@ var Example;
                     _this._stars.push(s);
                     _this.addPositionable(s);
                 }
+                // make sure ship draws above stars and cursor draws above everything
+                _this._player.layer = 10;
+                _this._gameCursor.layer = 999;
                 return _this;
             }
+            SpaceView.prototype.update = function (delta) {
+                _super.prototype.update.call(this, delta);
+                this.doPlayerInput();
+            };
+            SpaceView.prototype.doPlayerInput = function () {
+                // create some shortcut vars for readability
+                var input = Example.Game.instance.input;
+                var cursor = input.cursor;
+                var plyr = this._player;
+                // rotate toward cursor
+                plyr.rotation = Math.atan2(cursor.worldY - plyr.absolutePosition.y, cursor.worldX - plyr.absolutePosition.x);
+                // accelerate in rotation direction if mousebutton is down
+                if (input.buttonDown(Frixl.Input.MouseButtons.Left)) {
+                    plyr.acceleration.x = Math.cos(plyr.rotation) * Example.Config.shipAccel;
+                    plyr.acceleration.y = Math.sin(plyr.rotation) * Example.Config.shipAccel;
+                }
+                else {
+                    plyr.acceleration.x = 0;
+                    plyr.acceleration.y = 0;
+                }
+            };
             return SpaceView;
         }(Frixl.Views.View));
         Views.SpaceView = SpaceView;
