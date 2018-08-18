@@ -1405,9 +1405,9 @@ var Frixl;
                 }
                 this._positionables.splice(drawLayer, 0, positionable);
             };
-            View.prototype.addSprites = function (sprites) {
-                for (var i = 0; i < sprites.length; i += 1) {
-                    this.addPositionable(sprites[i]);
+            View.prototype.addPositionables = function (positionable) {
+                for (var i = 0; i < positionable.length; i += 1) {
+                    this.addPositionable(positionable[i]);
                 }
             };
             View.prototype.removePositionable = function (positionable) {
@@ -1416,9 +1416,9 @@ var Frixl;
                     this._positionables.splice(index, 1);
                 }
             };
-            View.prototype.removeSprites = function (sprites) {
-                for (var i = 0; i < sprites.length; i++) {
-                    this.removePositionable(sprites[i]);
+            View.prototype.removePositionables = function (positionable) {
+                for (var i = 0; i < positionable.length; i++) {
+                    this.removePositionable(positionable[i]);
                 }
             };
             View.prototype.clearSprites = function () {

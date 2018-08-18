@@ -25,9 +25,9 @@ namespace Frixl.Views {
             this._positionables.splice(drawLayer, 0, positionable);
         }
 
-        addSprites(sprites: Array<Entities.Sprite>): void {
-            for(let i = 0; i < sprites.length; i += 1) {
-                this.addPositionable(sprites[i]);
+        addPositionables(positionable: Array<Entities.Positionable>): void {
+            for(let i = 0; i < positionable.length; i += 1) {
+                this.addPositionable(positionable[i]);
             }
         }
 
@@ -38,9 +38,9 @@ namespace Frixl.Views {
             }
         }
 
-        removeSprites(sprites: Array<Entities.Sprite>): void {
-            for(let i = 0; i < sprites.length; i++) {
-                this.removePositionable(sprites[i]);
+        removePositionables(positionable: Array<Entities.Positionable>): void {
+            for(let i = 0; i < positionable.length; i++) {
+                this.removePositionable(positionable[i]);
             }
         }
 

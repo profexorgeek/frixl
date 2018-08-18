@@ -389,9 +389,9 @@ declare namespace Frixl.Views {
         readonly positionables: Array<Entities.Positionable>;
         update(delta: number): void;
         addPositionable(positionable: Entities.Positionable): void;
-        addSprites(sprites: Array<Entities.Sprite>): void;
+        addPositionables(positionable: Array<Entities.Positionable>): void;
         removePositionable(positionable: Entities.Positionable): void;
-        removeSprites(sprites: Array<Entities.Sprite>): void;
+        removePositionables(positionable: Array<Entities.Positionable>): void;
         clearSprites(): void;
     }
 }
