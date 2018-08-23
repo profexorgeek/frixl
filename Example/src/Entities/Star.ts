@@ -32,29 +32,26 @@ namespace Example.Entities {
         update(delta: number) {
             super.update(delta);
 
-            // create some shortcut vars for readability
-            let absPos = this.absolutePosition;
-            let cam = Game.instance.camera;
-
             // wrap the star on the screen
-            if(absPos.x > cam.right) {
-                this.x -= cam.width;
+            if(this.absolutePosition.x > Game.instance.camera.right) {
+                this._position.x -= Game.instance.camera.width;
             }
 
-            if(absPos.x < cam.left) {
-                this.x += cam.width;
+            if(this.absolutePosition.x < Game.instance.camera.left) {
+                this._position.x += Game.instance.camera.width;
             }
 
-            if(absPos.y > cam.top) {
-                this.y -= cam.height;
+            if(this.absolutePosition.y > Game.instance.camera.top) {
+                this._position.y -= Game.instance.camera.height;
             }
 
-            if(absPos.y < cam.bottom) {
-                this.y += cam.height;
+            if(this.absolutePosition.y < Game.instance.camera.bottom) {
+                this._position.y += Game.instance.camera.height;
             }
 
             // apply some parallax movement to fake depth
-            this._position = this._position.add(cam.getParallax(this._parallax));
+            this._position.x += Game.instance.camera.positionDelta.x * this._parallax;
+            this._position.y += Game.instance.camera.positionDelta.y * this._parallax;
         }
     }
 }

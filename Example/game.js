@@ -120,24 +120,22 @@ var Example;
             }
             Star.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
-                // create some shortcut vars for readability
-                var absPos = this.absolutePosition;
-                var cam = Example.Game.instance.camera;
                 // wrap the star on the screen
-                if (absPos.x > cam.right) {
-                    this.x -= cam.width;
+                if (this.absolutePosition.x > Example.Game.instance.camera.right) {
+                    this._position.x -= Example.Game.instance.camera.width;
                 }
-                if (absPos.x < cam.left) {
-                    this.x += cam.width;
+                if (this.absolutePosition.x < Example.Game.instance.camera.left) {
+                    this._position.x += Example.Game.instance.camera.width;
                 }
-                if (absPos.y > cam.top) {
-                    this.y -= cam.height;
+                if (this.absolutePosition.y > Example.Game.instance.camera.top) {
+                    this._position.y -= Example.Game.instance.camera.height;
                 }
-                if (absPos.y < cam.bottom) {
-                    this.y += cam.height;
+                if (this.absolutePosition.y < Example.Game.instance.camera.bottom) {
+                    this._position.y += Example.Game.instance.camera.height;
                 }
                 // apply some parallax movement to fake depth
-                this._position = this._position.add(cam.getParallax(this._parallax));
+                this._position.x += Example.Game.instance.camera.positionDelta.x * this._parallax;
+                this._position.y += Example.Game.instance.camera.positionDelta.y * this._parallax;
             };
             return Star;
         }(Frixl.Entities.Sprite));
