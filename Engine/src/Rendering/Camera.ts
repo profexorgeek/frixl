@@ -42,6 +42,10 @@ namespace Frixl.Rendering {
             return this._size.y;
         }
 
+        get positionDelta(): Util.Vector {
+            return this._positionDelta;
+        }
+
         get randomVectorInView(): Util.Vector {
             return new Util.Vector(
                 Util.GameUtil.randomInRange(this.left, this.right),
@@ -66,13 +70,6 @@ namespace Frixl.Rendering {
             // reset last frame position
             this._lastFramePos.x = this.absolutePosition.x;
             this._lastFramePos.y = this.absolutePosition.y;
-        }
-
-        getParallax(parallaxPercent: number): Util.Vector {
-            return new Util.Vector(
-                this._positionDelta.x * parallaxPercent,
-                this._positionDelta.y * parallaxPercent
-            );
         }
     }
 }

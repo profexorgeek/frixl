@@ -9,21 +9,41 @@ namespace Frixl.Util {
             this.y = y;
         }
 
-        subtract(v2: Vector) {
-            return new Vector(this.x - v2.x, this.y - v2.y);
+        length(): number {
+            let c = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+            return Math.abs(c);
         }
 
-        add(v2: Vector) {
-            return new Vector(this.x + v2.x, this.y + v2.y);
+        // Note: These operations mutate the vector instead of
+        // returning a new vector. This is because these are often
+        // used in the game loop and returning a new vector causes
+        // lots of allocations. Use copy() first if mutation is not
+        // intended
+        subtract(v2: Vector): void {
+            this.x -= v2.x;
+            this.y -= v2.y;
         }
 
-        divide(v2: Vector) {
-            return new Vector(this.x / v2.x, this.y / v2.y);
+        add(v2: Vector): void {
+            this.x += v2.x
+            this.y += v2.y;
         }
 
-        multiply(v2: Vector) {
-            return new Vector(this.x * v2.x, this.y * v2.y);
+        divide(v2: Vector): void {
+            this.x /= v2.x;
+            this.y /= v2.y;
         }
+
+        multiply(v2: Vector): void {
+            this.x *= v2.x;
+            this.y *= v2.y;
+        }
+
+        copy(): Vector {
+            return new Vector(this.x, this.y);
+        }
+
+        
 
         toString(): string {
             return '[x:' + this.x + ', y:' + this.y + ']';

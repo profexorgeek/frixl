@@ -2,6 +2,7 @@ declare namespace Frixl {
     class Game {
         private static _instance;
         protected _canvas: HTMLCanvasElement;
+        protected _context: CanvasRenderingContext2D;
         protected _fps: number;
         protected _paused: boolean;
         protected _gameTime: GameTime;
@@ -283,10 +284,10 @@ declare namespace Frixl.Rendering {
         readonly bottom: number;
         readonly width: number;
         readonly height: number;
+        readonly positionDelta: Util.Vector;
         readonly randomVectorInView: Util.Vector;
         constructor(width: number, height: number);
         update(delta: number): void;
-        getParallax(parallaxPercent: number): Util.Vector;
     }
 }
 declare namespace Frixl.Util {
@@ -303,7 +304,7 @@ declare namespace Frixl.Rendering {
         constructor();
         loadTexture(url: string, callback?: Function): void;
         getTexture(url: string): HTMLImageElement;
-        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void;
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, context: CanvasRenderingContext2D): void;
         private drawPositionable;
         private drawSprite;
     }
@@ -342,7 +343,7 @@ declare namespace Frixl.Rendering {
 }
 declare namespace Frixl.Rendering {
     interface IRenderer {
-        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void;
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, context: CanvasRenderingContext2D): void;
         loadTexture(path: string, callback: Function): void;
         getTexture(path: string): HTMLImageElement;
     }
@@ -380,10 +381,12 @@ declare namespace Frixl.Util {
         x: number;
         y: number;
         constructor(x?: number, y?: number);
-        subtract(v2: Vector): Vector;
-        add(v2: Vector): Vector;
-        divide(v2: Vector): Vector;
-        multiply(v2: Vector): Vector;
+        length(): number;
+        subtract(v2: Vector): void;
+        add(v2: Vector): void;
+        divide(v2: Vector): void;
+        multiply(v2: Vector): void;
+        copy(): Vector;
         toString(): string;
     }
 }

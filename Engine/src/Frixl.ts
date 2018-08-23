@@ -5,6 +5,7 @@ namespace Frixl {
         private static _instance:Game;
 
         protected _canvas: HTMLCanvasElement;
+        protected _context: CanvasRenderingContext2D;
         protected _fps: number;
         protected _paused: boolean;
         protected _gameTime: GameTime;
@@ -77,6 +78,7 @@ namespace Frixl {
         initialize(canvas: HTMLCanvasElement, fps: number): void {
             this.logger.debug('Initializing game.');
             this._canvas = canvas;
+            this._context = this._canvas.getContext('2d');
             this._fps = fps;
             this._camera = new Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Rendering.DefaultRenderer();
@@ -123,7 +125,7 @@ namespace Frixl {
     
         draw(): void {
             if(this._activeView != null) {
-                this._renderer.draw(this._activeView.positionables, this._camera, this._canvas);    
+                this._renderer.draw(this._activeView.positionables, this._camera, this._context);    
             }
         }
 

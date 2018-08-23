@@ -4,7 +4,7 @@ namespace Frixl.Rendering {
         
         draw(positionables: Array<Entities.Positionable>, 
             camera: Camera, 
-            canvas: HTMLCanvasElement): void;
+            context: CanvasRenderingContext2D): void;
 
         loadTexture(path: string, callback: Function): void
 

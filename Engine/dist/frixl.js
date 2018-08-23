@@ -98,6 +98,7 @@ var Frixl;
         Game.prototype.initialize = function (canvas, fps) {
             this.logger.debug('Initializing game.');
             this._canvas = canvas;
+            this._context = this._canvas.getContext('2d');
             this._fps = fps;
             this._camera = new Frixl.Rendering.Camera(this._canvas.width, this._canvas.height);
             this._renderer = new Frixl.Rendering.DefaultRenderer();
@@ -135,7 +136,7 @@ var Frixl;
         };
         Game.prototype.draw = function () {
             if (this._activeView != null) {
-                this._renderer.draw(this._activeView.positionables, this._camera, this._canvas);
+                this._renderer.draw(this._activeView.positionables, this._camera, this._context);
             }
         };
         Game.prototype.toString = function () {
@@ -1000,6 +1001,13 @@ var Frixl;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Camera.prototype, "positionDelta", {
+                get: function () {
+                    return this._positionDelta;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Object.defineProperty(Camera.prototype, "randomVectorInView", {
                 get: function () {
                     return new Frixl.Util.Vector(Frixl.Util.GameUtil.randomInRange(this.left, this.right), Frixl.Util.GameUtil.randomInRange(this.bottom, this.top));
@@ -1015,9 +1023,6 @@ var Frixl;
                 // reset last frame position
                 this._lastFramePos.x = this.absolutePosition.x;
                 this._lastFramePos.y = this.absolutePosition.y;
-            };
-            Camera.prototype.getParallax = function (parallaxPercent) {
-                return new Frixl.Util.Vector(this._positionDelta.x * parallaxPercent, this._positionDelta.y * parallaxPercent);
             };
             return Camera;
         }(Frixl.Entities.Positionable));
@@ -1096,12 +1101,11 @@ var Frixl;
                 }
                 return texture;
             };
-            DefaultRenderer.prototype.draw = function (positionables, camera, canvas) {
-                var context = canvas.getContext('2d');
+            DefaultRenderer.prototype.draw = function (positionables, camera, context) {
                 var camTransX = Frixl.Util.GameUtil.invert(camera.absolutePosition.x) + context.canvas.width / 2;
                 var camTransY = camera.absolutePosition.y + (context.canvas.height / 2);
                 context.fillStyle = camera.background;
-                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.fillRect(0, 0, context.canvas.width, context.canvas.height);
                 context.save();
                 context.translate(camTransX, camTransY);
                 for (var i = 0; i < positionables.length; i++) {
@@ -1383,17 +1387,33 @@ var Frixl;
                 this.x = x;
                 this.y = y;
             }
+            Vector.prototype.length = function () {
+                var c = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+                return Math.abs(c);
+            };
+            // Note: These operations mutate the vector instead of
+            // returning a new vector. This is because these are often
+            // used in the game loop and returning a new vector causes
+            // lots of allocations. Use copy() first if mutation is not
+            // intended
             Vector.prototype.subtract = function (v2) {
-                return new Vector(this.x - v2.x, this.y - v2.y);
+                this.x -= v2.x;
+                this.y -= v2.y;
             };
             Vector.prototype.add = function (v2) {
-                return new Vector(this.x + v2.x, this.y + v2.y);
+                this.x += v2.x;
+                this.y += v2.y;
             };
             Vector.prototype.divide = function (v2) {
-                return new Vector(this.x / v2.x, this.y / v2.y);
+                this.x /= v2.x;
+                this.y /= v2.y;
             };
             Vector.prototype.multiply = function (v2) {
-                return new Vector(this.x * v2.x, this.y * v2.y);
+                this.x *= v2.x;
+                this.y *= v2.y;
+            };
+            Vector.prototype.copy = function () {
+                return new Vector(this.x, this.y);
             };
             Vector.prototype.toString = function () {
                 return '[x:' + this.x + ', y:' + this.y + ']';

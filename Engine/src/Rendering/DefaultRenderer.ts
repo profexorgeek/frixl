@@ -42,13 +42,12 @@ namespace Frixl.Rendering {
             return texture;
         }
 
-        draw(positionables: Array<Entities.Positionable>, camera: Camera, canvas: HTMLCanvasElement): void {
-            let context = canvas.getContext('2d');
+        draw(positionables: Array<Entities.Positionable>, camera: Camera, context: CanvasRenderingContext2D): void {
             let camTransX = Util.GameUtil.invert(camera.absolutePosition.x) + context.canvas.width / 2;
             let camTransY = camera.absolutePosition.y + (context.canvas.height / 2);
 
             context.fillStyle = camera.background;
-            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
             context.save();
             context.translate(camTransX, camTransY);
