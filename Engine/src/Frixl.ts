@@ -12,6 +12,7 @@ namespace Frixl {
         protected _timer: any;
         protected _camera: Rendering.Camera;
         protected _input: Input.InputHandler;
+        protected _audio: Audio.AudioHandler;
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
@@ -34,6 +35,10 @@ namespace Frixl {
 
         get input(): Input.InputHandler {
             return this._input;
+        }
+
+        get audio(): Audio.AudioHandler {
+            return this._audio;
         }
 
         get canvas(): HTMLCanvasElement {
@@ -84,6 +89,7 @@ namespace Frixl {
             this._renderer = new Rendering.DefaultRenderer();
             this._gameTime = new GameTime();
             this._input = new Input.InputHandler();
+            this._audio = new Audio.AudioHandler();
 
             this.activeView = new Views.View();
         }

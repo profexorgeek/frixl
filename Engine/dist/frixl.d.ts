@@ -9,6 +9,7 @@ declare namespace Frixl {
         protected _timer: any;
         protected _camera: Rendering.Camera;
         protected _input: Input.InputHandler;
+        protected _audio: Audio.AudioHandler;
         protected _renderer: Rendering.IRenderer;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
@@ -17,6 +18,7 @@ declare namespace Frixl {
         readonly camera: Rendering.Camera;
         readonly renderer: Rendering.IRenderer;
         readonly input: Input.InputHandler;
+        readonly audio: Audio.AudioHandler;
         readonly canvas: HTMLCanvasElement;
         logger: Util.ILogger;
         activeView: Views.View;
@@ -46,6 +48,15 @@ declare namespace Frixl {
 declare namespace Frixl {
     interface IUpdateable {
         update(delta: number): void;
+    }
+}
+declare namespace Frixl.Audio {
+    class AudioHandler {
+        private _context;
+        private _audioBuffer;
+        constructor();
+        loadSound(url: string, success?: Function, fail?: Function): void;
+        playSound(url: string): void;
     }
 }
 declare namespace Frixl.Entities {
