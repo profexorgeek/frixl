@@ -18,6 +18,7 @@ var Example;
         function Config() {
         }
         Config.spriteSheet = './content/spriteSheet.png';
+        Config.laserSound = './content/laser.wav';
         Config.worldSize = 5000;
         Config.numStars = 100;
         Config.shipAccel = 150;
@@ -34,15 +35,22 @@ var Example;
         __extends(Game, _super);
         function Game() {
             var _this = _super.call(this) || this;
-            _this.onTexturesLoaded = function () {
-                _this.logger.debug('Game textures loaded.');
-                _this.activeView = new Example.Views.SpaceView();
-                _this.start();
+            _this._callbacksFired = 0;
+            _this._allCallbackCount = 2;
+            _this.onItemLoaded = function (response) {
+                _this._callbacksFired += 1;
+                Game.instance.logger.debug('Preloaded ' + _this._callbacksFired + '/' + _this._allCallbackCount + ' assets.');
+                if (_this._callbacksFired >= _this._allCallbackCount) {
+                    _this.activeView = new Example.Views.SpaceView();
+                    _this.start();
+                }
             };
             var canvas = document.getElementById('frixlCanvas');
             _this.initialize(canvas, 60);
             _this.showCursor = false;
-            _this.renderer.loadTexture(Example.Config.spriteSheet, _this.onTexturesLoaded);
+            _this.logger.debug('Loading game assets...');
+            _this.content.loadTexture(Example.Config.spriteSheet, _this.onItemLoaded);
+            _this.content.loadSound(Example.Config.laserSound, _this.onItemLoaded);
             return _this;
         }
         return Game;
@@ -195,6 +203,9 @@ var Example;
                 else {
                     plyr.acceleration.x = 0;
                     plyr.acceleration.y = 0;
+                }
+                if (input.keyPushed(Frixl.Input.Keys.Space)) {
+                    Example.Game.instance.audio.playSound(Example.Config.laserSound);
                 }
             };
             return SpaceView;

@@ -65,6 +65,10 @@ namespace Example.Views {
                 plyr.acceleration.y = 0;
             }
 
+            if(input.keyPushed(Frixl.Input.Keys.Space)) {
+                Game.instance.audio.playSound(Config.laserSound);
+            }
+
         }
     }
 }
