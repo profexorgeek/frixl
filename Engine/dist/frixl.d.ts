@@ -11,12 +11,14 @@ declare namespace Frixl {
         protected _input: Input.InputHandler;
         protected _audio: Audio.AudioHandler;
         protected _renderer: Rendering.IRenderer;
+        protected _content: Content.DefaultContentManager;
         protected _logger: Util.ILogger;
         protected _activeView: Views.View;
         protected _showCursor: boolean;
         static instance: Game;
         readonly camera: Rendering.Camera;
         readonly renderer: Rendering.IRenderer;
+        readonly content: Content.IContentManager;
         readonly input: Input.InputHandler;
         readonly audio: Audio.AudioHandler;
         readonly canvas: HTMLCanvasElement;
@@ -52,11 +54,31 @@ declare namespace Frixl {
 }
 declare namespace Frixl.Audio {
     class AudioHandler {
-        private _context;
-        private _audioBuffer;
-        constructor();
-        loadSound(url: string, success?: Function, fail?: Function): void;
         playSound(url: string): void;
+    }
+}
+declare namespace Frixl.Content {
+    class DefaultContentManager implements IContentManager {
+        private _audioContext;
+        private _assets;
+        readonly audioContext: AudioContext;
+        constructor();
+        private loadAsset;
+        loadJson<T>(url: string, success?: Function, fail?: Function): void;
+        loadTexture(url: string, success?: Function, fail?: Function): void;
+        loadSound(url: string, success?: Function, fail?: Function): void;
+        getAsset<T>(url: string): T;
+        unloadAsset(url: string): void;
+    }
+}
+declare namespace Frixl.Content {
+    interface IContentManager {
+        readonly audioContext: AudioContext;
+        loadJson<T>(url: string, success?: Function, fail?: Function): void;
+        loadTexture(url: string, success?: Function, fail?: Function): void;
+        loadSound(url: string, success?: Function, fail?: Function): void;
+        getAsset<T>(url: string): T;
+        unloadAsset(url: string): void;
     }
 }
 declare namespace Frixl.Entities {
@@ -311,10 +333,6 @@ declare namespace Frixl.Util {
 }
 declare namespace Frixl.Rendering {
     class DefaultRenderer implements IRenderer {
-        private _textures;
-        constructor();
-        loadTexture(url: string, callback?: Function): void;
-        getTexture(url: string): HTMLImageElement;
         draw(positionables: Array<Entities.Positionable>, camera: Camera, context: CanvasRenderingContext2D): void;
         private drawPositionable;
         private drawSprite;
@@ -355,8 +373,6 @@ declare namespace Frixl.Rendering {
 declare namespace Frixl.Rendering {
     interface IRenderer {
         draw(positionables: Array<Entities.Positionable>, camera: Camera, context: CanvasRenderingContext2D): void;
-        loadTexture(path: string, callback: Function): void;
-        getTexture(path: string): HTMLImageElement;
     }
 }
 declare namespace Frixl.Util {

@@ -45,6 +45,13 @@ var Frixl;
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(Game.prototype, "content", {
+            get: function () {
+                return this._content;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(Game.prototype, "input", {
             get: function () {
                 return this._input;
@@ -112,6 +119,7 @@ var Frixl;
             this._gameTime = new Frixl.GameTime();
             this._input = new Frixl.Input.InputHandler();
             this._audio = new Frixl.Audio.AudioHandler();
+            this._content = new Frixl.Content.DefaultContentManager();
             this.activeView = new Frixl.Views.View();
         };
         Game.prototype.start = function () {
@@ -194,71 +202,145 @@ var Frixl;
     (function (Audio) {
         var AudioHandler = /** @class */ (function () {
             function AudioHandler() {
-                this._audioBuffer = {};
-                try {
-                    this._context = new AudioContext();
-                }
-                catch (e) {
-                    Frixl.Game.instance.logger.error('Web Audio is not supported by this browser.');
-                    this._context = null;
-                }
             }
-            AudioHandler.prototype.loadSound = function (url, success, fail) {
-                if (success === void 0) { success = null; }
-                if (fail === void 0) { fail = null; }
-                Frixl.Game.instance.logger.debug("Loading audio: " + url);
-                if (this._context) {
-                    var xhr_1 = new XMLHttpRequest();
-                    var me_1 = this;
-                    xhr_1.addEventListener('readystatechange', function (e) {
-                        if (xhr_1.readyState === 4) {
-                            if (xhr_1.status === 200) {
-                                Frixl.Game.instance.logger.debug('Audio loaded: ' + url);
-                                me_1._context.decodeAudioData(xhr_1.response, function (buffer) {
-                                    Frixl.Game.instance.logger.debug('Audio decoded: ' + url);
-                                    me_1._audioBuffer[url] = buffer;
-                                    if (success) {
-                                        success();
-                                    }
-                                }, function () {
-                                    Frixl.Game.instance.logger.debug('Audio decode failure: ' + url);
-                                    if (fail) {
-                                        fail();
-                                    }
-                                });
-                            }
-                            else {
-                                Frixl.Game.instance.logger.debug('Audio decode failure: ' + url);
-                                if (fail) {
-                                    fail();
-                                }
-                            }
-                        }
-                    });
-                    xhr_1.open('GET', url, true);
-                    xhr_1.responseType = 'arraybuffer';
-                    xhr_1.send();
-                }
-                else {
-                    if (fail) {
-                        fail();
-                    }
-                }
-            };
             AudioHandler.prototype.playSound = function (url) {
-                if (this._context) {
-                    if (url in this._audioBuffer) {
-                        var src = this._context.createBufferSource();
-                        src.buffer = this._audioBuffer[url];
-                        src.connect(this._context.destination);
-                        src.start(0);
-                    }
+                var buffer = Frixl.Game.instance.content.getAsset(url);
+                var ctx = Frixl.Game.instance.content.audioContext;
+                if (buffer && ctx) {
+                    var src = ctx.createBufferSource();
+                    src.buffer = buffer;
+                    src.connect(ctx.destination);
+                    src.start(0);
                 }
             };
             return AudioHandler;
         }());
         Audio.AudioHandler = AudioHandler;
     })(Audio = Frixl.Audio || (Frixl.Audio = {}));
+})(Frixl || (Frixl = {}));
+var Frixl;
+(function (Frixl) {
+    var Content;
+    (function (Content) {
+        var DefaultContentManager = /** @class */ (function () {
+            function DefaultContentManager() {
+                this._assets = {};
+                try {
+                    this._audioContext = new AudioContext();
+                }
+                catch (e) {
+                    Frixl.Game.instance.logger.error('Web Audio API is not supported by this browser.');
+                    this._audioContext = null;
+                }
+            }
+            Object.defineProperty(DefaultContentManager.prototype, "audioContext", {
+                get: function () {
+                    return this._audioContext;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            DefaultContentManager.prototype.loadAsset = function (url, responseType, success, fail) {
+                if (responseType === void 0) { responseType = 'json'; }
+                if (success === void 0) { success = null; }
+                if (fail === void 0) { fail = null; }
+                var xhr = new XMLHttpRequest();
+                var me = this;
+                var log = Frixl.Game.instance.logger;
+                xhr.addEventListener('readystatechange', function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            log.debug('Loaded asset: ' + url);
+                            me._assets[url] = xhr.response;
+                            if (success) {
+                                success(xhr.response);
+                            }
+                        }
+                        else {
+                            log.debug('Bad response for ' + url + ' - ' + xhr.status);
+                            if (fail) {
+                                fail(xhr.response);
+                            }
+                        }
+                    }
+                });
+                xhr.responseType = responseType;
+                xhr.open('GET', url, true);
+                xhr.send();
+            };
+            DefaultContentManager.prototype.loadJson = function (url, success, fail) {
+                var me = this;
+                var log = Frixl.Game.instance.logger;
+                this.loadAsset(url, 'json', function (response) {
+                    try {
+                        var obj = JSON.parse(response);
+                        me._assets[url] = obj;
+                        if (success) {
+                            success(response);
+                        }
+                    }
+                    catch (_a) {
+                        log.error('Failed to load or parse json: ' + url);
+                        if (fail) {
+                            fail(response);
+                        }
+                    }
+                }, fail);
+            };
+            DefaultContentManager.prototype.loadTexture = function (url, success, fail) {
+                var me = this;
+                var log = Frixl.Game.instance.logger;
+                this.loadAsset(url, 'blob', function (response) {
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(response);
+                    me._assets[url] = img;
+                    if (success) {
+                        success(response);
+                    }
+                }, fail);
+            };
+            DefaultContentManager.prototype.loadSound = function (url, success, fail) {
+                var me = this;
+                var log = Frixl.Game.instance.logger;
+                this.loadAsset(url, 'arraybuffer', function (response) {
+                    if (response instanceof ArrayBuffer && me._audioContext) {
+                        me._audioContext.decodeAudioData(response, function (buffer) {
+                            me._assets[url] = buffer;
+                            log.debug('Decoded audio file: ' + url);
+                            if (success) {
+                                success(buffer);
+                            }
+                        }, function () {
+                            log.error('Failed to decode audio: ' + url);
+                            if (fail) {
+                                fail();
+                            }
+                        });
+                    }
+                    else {
+                        log.error('Failed to load data: ' + url);
+                        if (fail) {
+                            fail(response);
+                        }
+                    }
+                }, fail);
+            };
+            DefaultContentManager.prototype.getAsset = function (url) {
+                var asset = null;
+                if (url in this._assets) {
+                    asset = this._assets[url];
+                }
+                return asset;
+            };
+            DefaultContentManager.prototype.unloadAsset = function (url) {
+                if (url in this._assets) {
+                    delete (this._assets[url]);
+                }
+            };
+            return DefaultContentManager;
+        }());
+        Content.DefaultContentManager = DefaultContentManager;
+    })(Content = Frixl.Content || (Frixl.Content = {}));
 })(Frixl || (Frixl = {}));
 var Frixl;
 (function (Frixl) {
@@ -549,7 +631,7 @@ var Frixl;
                 },
                 set: function (name) {
                     this._textureName = name;
-                    var tex = Frixl.Game.instance.renderer.getTexture(this._textureName);
+                    var tex = Frixl.Game.instance.content.getAsset(this._textureName);
                     if (tex === null) {
                         throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
                     }
@@ -1150,37 +1232,7 @@ var Frixl;
     (function (Rendering) {
         var DefaultRenderer = /** @class */ (function () {
             function DefaultRenderer() {
-                this._textures = {};
             }
-            DefaultRenderer.prototype.loadTexture = function (url, callback) {
-                if (callback === void 0) { callback = null; }
-                if (!(url in this._textures) || this._textures[url] === null) {
-                    Frixl.Game.instance.logger.debug('Loading texture: ' + url);
-                    var img_1 = new Image();
-                    var me_2 = this;
-                    img_1.src = url;
-                    img_1.onload = function () {
-                        Frixl.Game.instance.logger.debug('Texture loaded: ' + url);
-                        me_2._textures[url] = img_1;
-                        if (callback) {
-                            callback();
-                        }
-                    };
-                }
-                else {
-                    callback();
-                }
-            };
-            DefaultRenderer.prototype.getTexture = function (url) {
-                var texture = null;
-                if ((url in this._textures) && this._textures[url] !== null) {
-                    texture = this._textures[url];
-                }
-                else {
-                    Frixl.Game.instance.logger.warn('Texture ' + url + ' was not found. It should be preloaded.');
-                }
-                return texture;
-            };
             DefaultRenderer.prototype.draw = function (positionables, camera, context) {
                 var camTransX = Frixl.Util.GameUtil.invert(camera.absolutePosition.x) + context.canvas.width / 2;
                 var camTransY = camera.absolutePosition.y + (context.canvas.height / 2);
@@ -1213,7 +1265,7 @@ var Frixl;
             };
             DefaultRenderer.prototype.drawSprite = function (sprite, context) {
                 if (!Frixl.Util.GameUtil.empty(sprite.textureName)) {
-                    var texture = this.getTexture(sprite.textureName);
+                    var texture = Frixl.Game.instance.content.getAsset(sprite.textureName);
                     var alpha = sprite.alpha;
                     context.globalAlpha = alpha;
                     if (texture) {
