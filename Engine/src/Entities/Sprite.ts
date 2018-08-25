@@ -49,7 +49,7 @@ namespace Frixl.Entities {
         }
         set textureName(name: string) {
             this._textureName = name;
-            let tex = Game.instance.renderer.getTexture(this._textureName);
+            let tex = Game.instance.content.getAsset<ImageBitmap>(this._textureName);
             if(tex === null) {
                 throw "ERROR: supplied texture is not loaded. Textures must loaded before a Sprite can be created!";
             }
