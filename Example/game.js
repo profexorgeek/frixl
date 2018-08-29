@@ -23,6 +23,7 @@ var Example;
         Config.numStars = 100;
         Config.shipAccel = 150;
         Config.shipDrag = 0.65;
+        Config.shipRadius = 12;
         return Config;
     }());
     Example.Config = Config;
@@ -92,6 +93,8 @@ var Example;
                 _this.textureName = Example.Config.spriteSheet;
                 // hardcoded frame for the ship in the spritesheet
                 _this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
+                // hardcoded radius for collision
+                _this.radius = Example.Config.shipRadius;
                 // give the ship some drag so it doesn't coast forever
                 _this._drag = Example.Config.shipDrag;
                 return _this;
@@ -161,10 +164,15 @@ var Example;
                 _this._gameCursor = new Example.Entities.GameCursor();
                 _this._stars = new Array();
                 _this._player = new Example.Entities.Ship();
+                _this._staticShip = new Example.Entities.Ship();
                 // shortcut to camera
                 var cam = Example.Game.instance.camera;
                 // add the game cursor instance
                 _this.addPositionable(_this._gameCursor);
+                // add the static ship
+                _this._staticShip.x = 100;
+                _this._staticShip.y = 100;
+                _this.addPositionable(_this._staticShip);
                 // add the player instance
                 _this.addPositionable(_this._player);
                 // attach the camera to the player
@@ -187,6 +195,8 @@ var Example;
             SpaceView.prototype.update = function (delta) {
                 _super.prototype.update.call(this, delta);
                 this.doPlayerInput();
+                // collide
+                this._player.collideAndBounce(this._staticShip, 0.5, 0.25);
             };
             SpaceView.prototype.doPlayerInput = function () {
                 // create some shortcut vars for readability
@@ -204,6 +214,7 @@ var Example;
                     plyr.acceleration.x = 0;
                     plyr.acceleration.y = 0;
                 }
+                // test audio
                 if (input.keyPushed(Frixl.Input.Keys.Space)) {
                     Example.Game.instance.audio.playSound(Example.Config.laserSound);
                 }

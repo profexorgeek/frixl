@@ -5,6 +5,7 @@ namespace Example.Views {
         private _gameCursor: Entities.GameCursor = new Entities.GameCursor();
         private _stars: Array<Entities.Star> = new Array<Entities.Star>();
         private _player: Entities.Ship = new Entities.Ship();
+        private _staticShip: Entities.Ship = new Entities.Ship();
 
 
         constructor() {
@@ -15,6 +16,11 @@ namespace Example.Views {
 
             // add the game cursor instance
             this.addPositionable(this._gameCursor);
+
+            // add the static ship
+            this._staticShip.x = 100;
+            this._staticShip.y = 100;
+            this.addPositionable(this._staticShip);
 
             // add the player instance
             this.addPositionable(this._player);
@@ -43,6 +49,9 @@ namespace Example.Views {
             super.update(delta);
 
             this.doPlayerInput();
+
+            // collide
+            this._player.collideAndBounce(this._staticShip, 0.5, 0.25);
         }
 
         doPlayerInput() {
@@ -65,6 +74,7 @@ namespace Example.Views {
                 plyr.acceleration.y = 0;
             }
 
+            // test audio
             if(input.keyPushed(Frixl.Input.Keys.Space)) {
                 Game.instance.audio.playSound(Config.laserSound);
             }

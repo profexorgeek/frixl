@@ -12,6 +12,9 @@ namespace Example.Entities {
             // hardcoded frame for the ship in the spritesheet
             this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
 
+            // hardcoded radius for collision
+            this.radius = Config.shipRadius;
+
             // give the ship some drag so it doesn't coast forever
             this._drag = Config.shipDrag;
         }
