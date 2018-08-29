@@ -17,6 +17,7 @@ namespace Frixl.Entities {
         protected _layer: number = 0;
         protected _children: Array<Positionable> = new Array<Positionable>();
         protected _parent: Positionable = null;
+        protected _radius: number = 0;
 
         // #region Properties
         get rotation(): number {
@@ -52,6 +53,13 @@ namespace Frixl.Entities {
         }
         set rotationVelocity(vel: number) {
             this._rotationVelocity = vel;
+        }
+
+        get radius(): number {
+            return this._radius;
+        }
+        set radius(r: number) {
+            this._radius = r;
         }
 
         get children(): Array<Positionable> {
@@ -133,6 +141,23 @@ namespace Frixl.Entities {
         }
         // #endregion
 
+        collidingWith(p: Positionable): boolean {
+            let rSum = this.radius + p.radius;
+            let dist = Util.Vector.hypotenuseLength(
+                this.absolutePosition.x - p.absolutePosition.x,
+                this.absolutePosition.y - p.absolutePosition.y);
+            return dist < rSum;
+        }
+
+        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): void {
+            if(this.collidingWith(p)) {
+                p.velocity.x += this.velocity.x * bouncePower * inertia;
+                p.velocity.y += this.velocity.y * bouncePower * inertia;
+
+                this.velocity.x *= -bouncePower;
+                this.velocity.y *= -bouncePower;
+            }
+        }
 
         addChild(c: Positionable): void {
             c.parent = this;

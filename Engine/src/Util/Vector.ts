@@ -10,7 +10,11 @@ namespace Frixl.Util {
         }
 
         length(): number {
-            let c = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+            return Vector.hypotenuseLength(this.x, this.y);
+        }
+
+        static hypotenuseLength(a: number, b: number): number {
+            let c = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
             return Math.abs(c);
         }
 

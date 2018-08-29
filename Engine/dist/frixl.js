@@ -361,6 +361,7 @@ var Frixl;
                 this._layer = 0;
                 this._children = new Array();
                 this._parent = null;
+                this._radius = 0;
             }
             Object.defineProperty(Positionable.prototype, "rotation", {
                 // #region Properties
@@ -409,6 +410,16 @@ var Frixl;
                 },
                 set: function (vel) {
                     this._rotationVelocity = vel;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Positionable.prototype, "radius", {
+                get: function () {
+                    return this._radius;
+                },
+                set: function (r) {
+                    this._radius = r;
                 },
                 enumerable: true,
                 configurable: true
@@ -507,6 +518,19 @@ var Frixl;
                 configurable: true
             });
             // #endregion
+            Positionable.prototype.collidingWith = function (p) {
+                var rSum = this.radius + p.radius;
+                var dist = Frixl.Util.Vector.hypotenuseLength(this.absolutePosition.x - p.absolutePosition.x, this.absolutePosition.y - p.absolutePosition.y);
+                return dist < rSum;
+            };
+            Positionable.prototype.collideAndBounce = function (p, bouncePower, inertia) {
+                if (this.collidingWith(p)) {
+                    p.velocity.x += this.velocity.x * bouncePower * inertia;
+                    p.velocity.y += this.velocity.y * bouncePower * inertia;
+                    this.velocity.x *= -bouncePower;
+                    this.velocity.y *= -bouncePower;
+                }
+            };
             Positionable.prototype.addChild = function (c) {
                 c.parent = this;
                 this._children.push(c);
@@ -1520,7 +1544,10 @@ var Frixl;
                 this.y = y;
             }
             Vector.prototype.length = function () {
-                var c = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+                return Vector.hypotenuseLength(this.x, this.y);
+            };
+            Vector.hypotenuseLength = function (a, b) {
+                var c = Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
                 return Math.abs(c);
             };
             // Note: These operations mutate the vector instead of

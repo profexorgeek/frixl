@@ -96,11 +96,13 @@ declare namespace Frixl.Entities {
         protected _layer: number;
         protected _children: Array<Positionable>;
         protected _parent: Positionable;
+        protected _radius: number;
         rotation: number;
         velocity: Util.Vector;
         acceleration: Util.Vector;
         drag: number;
         rotationVelocity: number;
+        radius: number;
         readonly children: Array<Positionable>;
         parent: Positionable;
         x: number;
@@ -108,6 +110,8 @@ declare namespace Frixl.Entities {
         layer: number;
         readonly absolutePosition: Util.Vector;
         readonly absoluteRotation: number;
+        collidingWith(p: Positionable): boolean;
+        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): void;
         addChild(c: Positionable): void;
         removeChild(c: Positionable): void;
         attachTo(p: Positionable): void;
@@ -409,6 +413,7 @@ declare namespace Frixl.Util {
         y: number;
         constructor(x?: number, y?: number);
         length(): number;
+        static hypotenuseLength(a: number, b: number): number;
         subtract(v2: Vector): void;
         add(v2: Vector): void;
         divide(v2: Vector): void;
