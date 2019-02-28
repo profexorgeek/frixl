@@ -4,8 +4,8 @@ namespace Example.Entities {
 
         constructor() {
             super();
-            this.textureName = Config.spriteSheet;
-            this.frame = new Frixl.Rendering.Frame(32, 0, 32, 32);
+            this.textureName = GameConstants.spriteSheet;
+            this.frame = GameConstants.frameCursor;
         }
 
         update(delta: number) {

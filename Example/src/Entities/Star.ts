@@ -4,24 +4,13 @@ namespace Example.Entities {
 
         private _parallax = 0;
 
-        // hardcoded frames on the spritesheet
-        private _starFrames = new Array<Frixl.Rendering.Frame>(
-            new Frixl.Rendering.Frame(96, 16, 16, 16),
-            new Frixl.Rendering.Frame(112, 0, 16, 16)
-        );
-
         constructor() {
             super();
 
-            this.textureName = Config.spriteSheet;
+            this.textureName = GameConstants.spriteSheet;
 
             // pick a random star texture
-            if(Math.random() < 0.1) {
-                this.frame = this._starFrames[1];
-            }
-            else {
-                this.frame = this._starFrames[0];
-            }
+            this.frame = Frixl.Util.GameUtil.randomInArray(GameConstants.framesStar);
 
             // randomize star's appearance
             this.alpha = Frixl.Util.GameUtil.randomInRange(0.4, 1);

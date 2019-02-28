@@ -9,13 +9,13 @@ namespace Example {
         constructor() {
             super();
             let canvas = document.getElementById('frixlCanvas') as HTMLCanvasElement;
-            this.initialize(canvas, 60);
+            this.initialize(canvas, GameConstants.fps);
 
             this.showCursor = false;
 
             this.logger.debug('Loading game assets...');
-            this.content.loadTexture(Config.spriteSheet, this.onItemLoaded);
-            this.content.loadSound(Config.laserSound, this.onItemLoaded);
+            this.content.loadTexture(GameConstants.spriteSheet, this.onItemLoaded);
+            this.content.loadSound(GameConstants.laserSound, this.onItemLoaded);
         }
 
         onItemLoaded = (response: any) => {

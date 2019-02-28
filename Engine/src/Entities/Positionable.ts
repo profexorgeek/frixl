@@ -141,22 +141,57 @@ namespace Frixl.Entities {
         }
         // #endregion
 
-        collidingWith(p: Positionable): boolean {
-            let rSum = this.radius + p.radius;
-            let dist = Util.Vector.hypotenuseLength(
-                this.absolutePosition.x - p.absolutePosition.x,
-                this.absolutePosition.y - p.absolutePosition.y);
-            return dist < rSum;
+        rotationTo(p: Positionable): number {
+            const dx = p.absolutePosition.x - this.absolutePosition.x;
+            const dy = p.absolutePosition.y - this.absolutePosition.y;
+            return Math.atan2(dy, dx);
         }
 
-        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): void {
-            if(this.collidingWith(p)) {
+        collidingWith(p: Positionable): boolean {
+            return this.collisionOverlap(p) > 0;
+        }
+
+        collisionOverlap(p: Positionable): number {
+            const rSum = this.radius + p.radius;
+            const dist = Util.Vector.hypotenuseLength(
+                this.absolutePosition.x - p.absolutePosition.x,
+                this.absolutePosition.y - p.absolutePosition.y);
+            return rSum > dist ? rSum - dist : 0;
+        }
+
+        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): boolean {
+            const overlap = this.collisionOverlap(p);
+            let collided = false;
+
+            if(overlap > 0) {
+                // if positions are identical, introduce slight random movement
+                if(this.absolutePosition.x == p.absolutePosition.x && this.absolutePosition.y == p.absolutePosition.y) {
+                    this.x += Util.GameUtil.randomInRange(-1, 1);
+                    this.y += Util.GameUtil.randomInRange(-1, 1);
+
+                    // we changed position, force abs recalc
+                    this._absPosCalculatedThisFrame = false;
+                }
+
+                // move to nearest non-colliding state
+                const rotationFrom = Util.GameUtil.invertRotation(this.rotationTo(p));
+                this.x += Math.cos(rotationFrom) * overlap;
+                this.y += Math.sin(rotationFrom) * overlap;
+
+                // we changed position, force abs recalc
+                this._absPosCalculatedThisFrame = false;
+
+                // bounce
+                // TODO: this calculation is all wrong. It works in simple cases but needs major improvement
                 p.velocity.x += this.velocity.x * bouncePower * inertia;
                 p.velocity.y += this.velocity.y * bouncePower * inertia;
-
                 this.velocity.x *= -bouncePower;
                 this.velocity.y *= -bouncePower;
+
+                collided = true;
             }
+
+            return collided;
         }
 
         addChild(c: Positionable): void {
@@ -193,14 +228,7 @@ namespace Frixl.Entities {
             this._velocity.y += (this._acceleration.y * delta) - (this._drag * this._velocity.y * delta);
 
             this._rotation += this._rotationVelocity * delta;
-
-            while(this._rotation >= twoPi) {
-                this._rotation -= twoPi;
-            }
-
-            while(this._rotation < 0) {
-                this._rotation += twoPi;
-            }
+            this._rotation = Util.GameUtil.normalizeRotation(this._rotation);
 
             // sort children by layer
             this._children.sort((a: Positionable, b: Positionable): number => {

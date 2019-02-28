@@ -12,6 +12,12 @@
             padding:0;
             border-collapse: collapse;
             overflow: hidden;
+            background: rgb(179, 175, 186);
+        }
+
+        canvas {
+            border-radius: 10px;
+            border: 1px solid rgb(205, 215, 221);
         }
     </style>
 
@@ -24,12 +30,17 @@
     <script>
         window.onload = function () {
 
+            // fit to window on mobile devices
             if(/Mobi|Android/i.test(navigator.userAgent)) {
                 var c = document.getElementById("frixlCanvas");
                 c.width = window.innerWidth;
                 c.height = window.innerHeight;
             }
 
+            // prevent right-click context menu
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // start the game engine
             var game = new Example.Game();
         }
     </script>

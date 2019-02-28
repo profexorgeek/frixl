@@ -102,7 +102,7 @@ namespace Frixl {
 
         start(): void {
             this.logger.debug('Starting game.');
-            let g = this;
+            const g = this;
             this._timer = setInterval(function () {
                 g.update()
             }, (1000 / this._fps));

@@ -2,21 +2,41 @@ namespace Example.Entities {
 
     export class Ship extends Frixl.Entities.Sprite {
 
+        private halfWorldSize: number = GameConstants.worldSize / 2;
 
         constructor() {
             super();
-
             // get the spritesheet name from the config file
-            this.textureName = Config.spriteSheet;
+            this.textureName = GameConstants.spriteSheet;
 
-            // hardcoded frame for the ship in the spritesheet
-            this.frame = new Frixl.Rendering.Frame(352, 0, 32, 32);
+            // get a random sprite
+            this.frame = Frixl.Util.GameUtil.randomInArray(GameConstants.framesShipScout);
 
             // hardcoded radius for collision
-            this.radius = Config.shipRadius;
+            this.radius = GameConstants.shipRadius;
 
             // give the ship some drag so it doesn't coast forever
-            this._drag = Config.shipDrag;
+            this._drag = GameConstants.shipDrag;
+        }
+
+        update(delta: number) {
+            super.update(delta);
+
+            // if(this.x < -this.halfWorldSize) {
+            //     this.x = this.halfWorldSize;
+            // }
+
+            // if(this.x > this.halfWorldSize) {
+            //     this.x = -this.halfWorldSize;
+            // }
+
+            // if(this.y < -this.halfWorldSize) {
+            //     this.y = this.halfWorldSize;
+            // }
+
+            // if(this.y > this.halfWorldSize) {
+            //     this.y = -this.halfWorldSize;
+            // }
         }
     }
 }

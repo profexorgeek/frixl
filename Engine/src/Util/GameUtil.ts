@@ -23,10 +23,36 @@ namespace Frixl.Util {
             return ret;
         }
 
+        static normalizeRotation(rotation: number): number {
+            const twoPi = Math.PI * 2;
+            while(rotation < 0) {
+                rotation += twoPi;
+            }
+
+            while(rotation > twoPi) {
+                rotation -= twoPi;
+            }
+
+            return rotation;
+        }
+
+        static invertRotation(rotation: number) {
+            return GameUtil.normalizeRotation(rotation - Math.PI);
+        }
+
         static randomInRange(min: number, max: number): number {
-            let range = max - min;
-            let val = Math.random() * range;
+            const range = max - min;
+            const val = Math.random() * range;
             return val + min;
+        }
+
+        static randomIntInRange(min: number, max: number): number {
+            return Math.floor(GameUtil.randomInRange(min, max));
+        }
+
+        static randomInArray<T>(array: Array<T>): T {
+            const i = GameUtil.randomIntInRange(0, array.length);
+            return array[i];
         }
     }
 }

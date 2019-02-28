@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -518,18 +518,45 @@ var Frixl;
                 configurable: true
             });
             // #endregion
+            Positionable.prototype.rotationTo = function (p) {
+                var dx = p.absolutePosition.x - this.absolutePosition.x;
+                var dy = p.absolutePosition.y - this.absolutePosition.y;
+                return Math.atan2(dy, dx);
+            };
             Positionable.prototype.collidingWith = function (p) {
+                return this.collisionOverlap(p) > 0;
+            };
+            Positionable.prototype.collisionOverlap = function (p) {
                 var rSum = this.radius + p.radius;
                 var dist = Frixl.Util.Vector.hypotenuseLength(this.absolutePosition.x - p.absolutePosition.x, this.absolutePosition.y - p.absolutePosition.y);
-                return dist < rSum;
+                return rSum > dist ? rSum - dist : 0;
             };
             Positionable.prototype.collideAndBounce = function (p, bouncePower, inertia) {
-                if (this.collidingWith(p)) {
+                var overlap = this.collisionOverlap(p);
+                var collided = false;
+                if (overlap > 0) {
+                    // if positions are identical, introduce slight random movement
+                    if (this.absolutePosition.x == p.absolutePosition.x && this.absolutePosition.y == p.absolutePosition.y) {
+                        this.x += Frixl.Util.GameUtil.randomInRange(-1, 1);
+                        this.y += Frixl.Util.GameUtil.randomInRange(-1, 1);
+                        // we changed position, force abs recalc
+                        this._absPosCalculatedThisFrame = false;
+                    }
+                    // move to nearest non-colliding state
+                    var rotationFrom = Frixl.Util.GameUtil.invertRotation(this.rotationTo(p));
+                    this.x += Math.cos(rotationFrom) * overlap;
+                    this.y += Math.sin(rotationFrom) * overlap;
+                    // we changed position, force abs recalc
+                    this._absPosCalculatedThisFrame = false;
+                    // bounce
+                    // TODO: this calculation is all wrong. It works in simple cases but needs major improvement
                     p.velocity.x += this.velocity.x * bouncePower * inertia;
                     p.velocity.y += this.velocity.y * bouncePower * inertia;
                     this.velocity.x *= -bouncePower;
                     this.velocity.y *= -bouncePower;
+                    collided = true;
                 }
+                return collided;
             };
             Positionable.prototype.addChild = function (c) {
                 c.parent = this;
@@ -558,12 +585,7 @@ var Frixl;
                 this._velocity.x += (this._acceleration.x * delta) - (this._drag * this._velocity.x * delta);
                 this._velocity.y += (this._acceleration.y * delta) - (this._drag * this._velocity.y * delta);
                 this._rotation += this._rotationVelocity * delta;
-                while (this._rotation >= twoPi) {
-                    this._rotation -= twoPi;
-                }
-                while (this._rotation < 0) {
-                    this._rotation += twoPi;
-                }
+                this._rotation = Frixl.Util.GameUtil.normalizeRotation(this._rotation);
                 // sort children by layer
                 this._children.sort(function (a, b) {
                     return a.layer - b.layer;
@@ -1238,10 +1260,30 @@ var Frixl;
                 }
                 return ret;
             };
+            GameUtil.normalizeRotation = function (rotation) {
+                var twoPi = Math.PI * 2;
+                while (rotation < 0) {
+                    rotation += twoPi;
+                }
+                while (rotation > twoPi) {
+                    rotation -= twoPi;
+                }
+                return rotation;
+            };
+            GameUtil.invertRotation = function (rotation) {
+                return GameUtil.normalizeRotation(rotation - Math.PI);
+            };
             GameUtil.randomInRange = function (min, max) {
                 var range = max - min;
                 var val = Math.random() * range;
                 return val + min;
+            };
+            GameUtil.randomIntInRange = function (min, max) {
+                return Math.floor(GameUtil.randomInRange(min, max));
+            };
+            GameUtil.randomInArray = function (array) {
+                var i = GameUtil.randomIntInRange(0, array.length);
+                return array[i];
             };
             return GameUtil;
         }());

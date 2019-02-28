@@ -110,8 +110,10 @@ declare namespace Frixl.Entities {
         layer: number;
         readonly absolutePosition: Util.Vector;
         readonly absoluteRotation: number;
+        rotationTo(p: Positionable): number;
         collidingWith(p: Positionable): boolean;
-        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): void;
+        collisionOverlap(p: Positionable): number;
+        collideAndBounce(p: Positionable, bouncePower: number, inertia: number): boolean;
         addChild(c: Positionable): void;
         removeChild(c: Positionable): void;
         attachTo(p: Positionable): void;
@@ -332,7 +334,11 @@ declare namespace Frixl.Util {
         static empty(str: string): boolean;
         static invert(num: number): number;
         static clamp(val: number, min: number, max: number): number;
+        static normalizeRotation(rotation: number): number;
+        static invertRotation(rotation: number): number;
         static randomInRange(min: number, max: number): number;
+        static randomIntInRange(min: number, max: number): number;
+        static randomInArray<T>(array: Array<T>): T;
     }
 }
 declare namespace Frixl.Rendering {
